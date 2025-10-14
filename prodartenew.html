@@ -88,7 +88,7 @@
               <select id="tipoCadastro" class="form-select" required>
                 <option value="" data-products-id="" selected>Selecione...</option>
                 <option value="empreendedor" data-products-id="empreendedor">Empreendedor</option>
-                <option value="economia-solidaria" data-products-id="economia-solidaria">Empreendedor: Economia solidária</option>
+                <option value="economia-solidaria" data-products-id="economia-solidaria">Economia solidária</option>
                 <option value="artesanato" data-products-id="artesanato">Artesão</option>
                 <option value="gastronomia" data-products-id="gastronomia">Gastronomia</option>
               </select>
@@ -98,7 +98,7 @@
       </div>
 
       <!-- Seção 2: Produto -->
-      <div class="card card-form mb-4">
+      <div class="card card-form mb-4" id="produtoSection">
         <div class="card-header d-flex justify-content-between align-items-center">
           <h2 class="h5 mb-0">Produto</h2>
           <span class="badge badge-soft">Campos dinâmicos</span>
@@ -716,15 +716,36 @@
         const tipoSelect = document.getElementById('tipoCadastro');
         const option = tipoSelect ? tipoSelect.selectedOptions[0] : null;
         const tipoId = option ? (option.dataset?.productsId || option.value || '').trim() : '';
+        const isEconomiaSolidaria = tipoId === 'economia-solidaria';
+        const produtoSection = document.getElementById('produtoSection');
+        if(produtoSection){
+          produtoSection.classList.toggle('d-none', isEconomiaSolidaria);
+        }
+
+        if(isEconomiaSolidaria){
+          sel.required = false;
+          sel.disabled = true;
+          while (sel.options.length) sel.remove(0);
+          sel.add(new Option('Selecione...', ''));
+          sel.value = '';
+          resetProdutoOutro();
+          return;
+        }
 
         if(!tipoId){
           while (sel.options.length) sel.remove(0);
           sel.add(new Option('Selecione o tipo de cadastro...', ''));
           sel.value = '';
           sel.disabled = true;
+          sel.required = false;
+          if(produtoSection){
+            produtoSection.classList.remove('d-none');
+          }
           resetProdutoOutro();
           return;
         }
+
+        sel.required = true;
 
         const payload = { id: tipoId };
 
