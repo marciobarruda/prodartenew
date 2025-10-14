@@ -87,9 +87,9 @@
               <label class="form-label required" for="tipoCadastro">Tipo de cadastro</label>
               <select id="tipoCadastro" class="form-select" required>
                 <option value="" data-products-id="" selected>Selecione...</option>
-                <option value="empreendedor" data-products-id="empreendedor">Empreendedor</option>
-                <option value="economia-solidaria" data-products-id="economia-solidaria">Empreendedor: Economia solidária</option>
                 <option value="artesanato" data-products-id="artesanato">Artesão</option>
+                <option value="economia-solidaria" data-products-id="economia-solidaria">Economia solidária</option>
+                <option value="empreendedor" data-products-id="empreendedor">Empreendedor</option>
                 <option value="gastronomia" data-products-id="gastronomia">Gastronomia</option>
               </select>
             </div>
@@ -98,7 +98,7 @@
       </div>
 
       <!-- Seção 2: Produto -->
-      <div class="card card-form mb-4">
+      <div class="card card-form mb-4" id="produtoSection">
         <div class="card-header d-flex justify-content-between align-items-center">
           <h2 class="h5 mb-0">Produto</h2>
           <span class="badge badge-soft">Campos dinâmicos</span>
@@ -142,7 +142,7 @@
             </div>
             <div class="col-md-4">
               <label class="form-label" for="rg">Documento de Identidade</label>
-              <input type="text" class="form-control" id="rg">
+              <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="14" class="form-control" id="rg" placeholder="Somente números">
             </div>
             <div class="col-md-4">
               <label class="form-label required" for="genero">Identidade de gênero</label>
@@ -181,6 +181,7 @@
             <div class="col-md-5">
               <label class="form-label required" for="email">E-mail</label>
               <input type="email" class="form-control" id="email" placeholder="nome@exemplo.com" required>
+              <div class="help" id="emailHelp"></div>
             </div>
             <div class="col-md-4">
               <label class="form-label required" for="celular">Celular</label>
@@ -425,30 +426,30 @@
               <label class="form-label required" for="tempoAtv">Tempo de atividade</label>
               <select id="tempoAtv" class="form-select" required>
                 <option value="" selected>Selecione...</option>
-                <option>&lt; 6 meses</option>
-                <option>6–12 meses</option>
-                <option>1–2 anos</option>
-                <option>3–5 anos</option>
-                <option>&gt; 5 anos</option>
+                <option>Menos de 6 meses</option>
+                <option>Entre 6 e 12 meses</option>
+                <option>De 1 a 2 anos</option>
+                <option>De 3 a 5 anos</option>
+                <option>Mais de 5 anos</option>
               </select>
             </div>
             <div class="col-md-4">
               <label class="form-label required" for="renda">Rendimento médio mensal</label>
               <select id="renda" class="form-select" required>
                 <option value="" selected>Selecione...</option>
-                <option>Até 1 SM</option>
-                <option>1–2 SM</option>
-                <option>2–3 SM</option>
-                <option>3–5 SM</option>
-                <option>&gt; 5 SM</option>
+                <option>Até 1 salário mínimo</option>
+                <option>De 1 a 2 salários mínimos</option>
+                <option>De 2 a 3 salários mínimos</option>
+                <option>De 3 a 5 salários mínimos</option>
+                <option>Mais de 5 salários mínimos</option>
               </select>
             </div>
             <div class="col-md-4">
-              <label class="form-label required" for="divulgacao">Como ficou sabendo do cadastro PRODARTE</label>
+              <label class="form-label required" for="divulgacao">Como ficou sabendo do PRODARTE</label>
               <select id="divulgacao" class="form-select" required>
                 <option value="" selected>Selecione...</option>
                 <option value="REDE_SOCIAL">Redes sociais</option>
-                <option value="SITE_PCR">Site/Portal PCR</option>
+                <option value="SITE_PCR">Site da prefeitura/Conecta Recife</option>
                 <option value="EVENTO_ORG">Evento/Organização</option>
                 <option value="INDICACAO">Indicação</option>
                 <option value="OUTRO">Outro</option>
@@ -487,6 +488,12 @@
         </div>
         <div class="card-body">
           <div id="reviewBlock" class="mb-3"></div>
+          <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="termoResponsabilidade">
+            <label class="form-check-label" for="termoResponsabilidade">
+              DECLARO que todas as informações fornecidas são verdadeiras e exatas, DECLARO, ainda, estar ciente de que prestar declaração falsa caracteriza o crime de falsidade ideológica previsto no art. 299 do Código Penal Brasileiro, e que por tal crime serei responsabilizado, independentemente das sanções administrativas, caso se comprove a inveracidade do declarado neste documento. DECLARO estar ciente e de acordo com os termos da Política de Privacidade, nos termos da Lei nº 13.709/2018 (Lei Geral de Proteção de Dados Pessoais – LGPD). DECLARO, por fim, que tomo ciência, neste ato, de toda a legislação mencionada acima.
+            </label>
+          </div>
           <div class="d-flex gap-2">
             <button type="button" class="btn btn-secondary" id="btnSubmitAll" disabled>Enviar dados</button>
             <div id="finalStatus" class="ms-2"></div>
@@ -510,11 +517,11 @@
       const $ = (sel) => document.querySelector(sel);
       const onlyDigits = (s) => (s||'').replace(/\\D+/g, '');
       const normalize = (value) => (value||'').normalize('NFD').replace(/\p{Diacritic}/gu, '').toUpperCase().trim();
-      const esc = s => { const d=document.createElement('div'); d.innerText=s??''; return d.innerHTML||'—'; };
-      const fmtCPF = v => { const d = onlyDigits(v||''); return d.length===11 ? d.replace(/(\\d{3})(\\d{3})(\\d{3})(\\d{2})/,'$1.$2.$3-$4') : (d||'—'); };
-      const fmtCEP = v => { const d = onlyDigits(v||''); return d.length===8 ? d.replace(/(\\d{5})(\\d{3})/,'$1-$2') : (d||'—'); };
+      const esc = s => { const d=document.createElement('div'); d.innerText=s??''; return d.innerHTML||''; };
+      const fmtCPF = v => { const d = onlyDigits(v||''); return d.length===11 ? d.replace(/(\\d{3})(\\d{3})(\\d{3})(\\d{2})/,'$1.$2.$3-$4') : (d||''); };
+      const fmtCEP = v => { const d = onlyDigits(v||''); return d.length===8 ? d.replace(/(\\d{5})(\\d{3})/,'$1-$2') : (d||''); };
       const fmtDateBR = (value) => {
-        if(!value) return '—';
+        if(!value) return '';
         const parts = String(value).split('-');
         if(parts.length === 3){
           const [y,m,d] = parts;
@@ -526,7 +533,7 @@
         if(!Number.isNaN(dt.getTime())){
           return new Intl.DateTimeFormat('pt-BR').format(dt);
         }
-        return value;
+        return value || '';
       };
 
       // Normalização para produtos ---------------------------------------
@@ -604,6 +611,29 @@
 
       // Masks/validations live
       $('#cpf').addEventListener('input', e=>{ e.target.value=onlyDigits(e.target.value).slice(0,11); const ok=isValidCPF(e.target.value); $('#cpfHelp').textContent = ok? '' : 'CPF inválido'; updateReview(); refreshSubmitState(); });
+      $('#cpf').addEventListener('keydown', e=>{
+        if(e.ctrlKey || e.metaKey || e.altKey) return;
+        const allowedKeys = ['Backspace','Tab','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Delete','Home','End'];
+        if(allowedKeys.includes(e.key)) return;
+        if(/^[0-9]$/.test(e.key)) return;
+        e.preventDefault();
+      });
+      $('#cpf').addEventListener('paste', e=>{
+        e.preventDefault();
+        const input = e.target;
+        const clip = (e.clipboardData || window.clipboardData);
+        const paste = onlyDigits((clip && clip.getData ? clip.getData('text') : '') || '').slice(0,11);
+        const start = input.selectionStart || 0;
+        const end = input.selectionEnd || 0;
+        const value = input.value;
+        const newValue = (value.slice(0, start) + paste + value.slice(end)).slice(0,11);
+        input.value = newValue;
+        const newPos = Math.min(start + paste.length, newValue.length);
+        requestAnimationFrame(()=>{
+          input.setSelectionRange(newPos, newPos);
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+      });
       $('#celular').addEventListener('input', e=>{
         const digits = onlyDigits(e.target.value).slice(0,11);
         e.target.value = digits;
@@ -631,10 +661,114 @@
         const newPos = Math.min(start + paste.length, newValue.length);
         requestAnimationFrame(()=>{ input.setSelectionRange(newPos, newPos); input.dispatchEvent(new Event('input', { bubbles: true })); });
       });
-      $('#email').addEventListener('input', e=>{
-        const ok = isValidEmail(e.target.value);
-        e.target.setCustomValidity(ok ? '' : 'Informe um e-mail válido.');
+      $('#rg').addEventListener('input', e=>{
+        const digits = onlyDigits(e.target.value).slice(0,14);
+        if(e.target.value !== digits){
+          e.target.value = digits;
+        }
+        updateReview();
+        refreshSubmitState();
+      });
+      $('#rg').addEventListener('keydown', e=>{
+        if(e.ctrlKey || e.metaKey || e.altKey) return;
+        const allowedKeys = ['Backspace','Tab','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Delete','Home','End'];
+        if(allowedKeys.includes(e.key)) return;
+        if(/^[0-9]$/.test(e.key)) return;
+        e.preventDefault();
+      });
+      $('#rg').addEventListener('paste', e=>{
+        e.preventDefault();
+        const input = e.target;
+        const clip = (e.clipboardData || window.clipboardData);
+        const paste = onlyDigits((clip && clip.getData ? clip.getData('text') : '') || '').slice(0,14);
+        const start = input.selectionStart || 0;
+        const end = input.selectionEnd || 0;
+        const value = input.value;
+        const newValue = (value.slice(0, start) + paste + value.slice(end)).slice(0,14);
+        input.value = newValue;
+        const newPos = Math.min(start + paste.length, newValue.length);
+        requestAnimationFrame(()=>{
+          input.setSelectionRange(newPos, newPos);
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+      });
+      function sanitizeNumeroValue(value){
+        const upper = String(value || '').toUpperCase();
+        if(['S','S/','S/N'].includes(upper)) return upper;
+        return upper.replace(/[^0-9]/g, '');
+      }
+      function numeroIsValid(value){
+        return value === 'S/N' || /^[0-9]+$/.test(value);
+      }
+      $('#numero').addEventListener('input', e=>{
+        const sanitized = sanitizeNumeroValue(e.target.value);
+        if(e.target.value !== sanitized){
+          e.target.value = sanitized;
+        }
+        const ok = numeroIsValid(sanitized);
+        e.target.setCustomValidity(ok ? '' : 'Informe o número ou S/N.');
         updateReview(); refreshSubmitState();
+      });
+      $('#numero').addEventListener('blur', e=>{
+        const sanitized = sanitizeNumeroValue(e.target.value);
+        if(e.target.value !== sanitized){
+          e.target.value = sanitized;
+        }
+        const ok = numeroIsValid(sanitized);
+        e.target.setCustomValidity(ok ? '' : 'Informe o número ou S/N.');
+      });
+      $('#numero').addEventListener('keydown', e=>{
+        if(e.ctrlKey || e.metaKey || e.altKey) return;
+        const allowedKeys = ['Backspace','Tab','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Delete','Home','End'];
+        if(allowedKeys.includes(e.key)) return;
+        if(/^[0-9]$/.test(e.key)) return;
+        if(['s','S','/','n','N'].includes(e.key)) return;
+        e.preventDefault();
+      });
+      $('#numero').addEventListener('paste', e=>{
+        e.preventDefault();
+        const input = e.target;
+        const paste = sanitizeNumeroValue(e.clipboardData.getData('text'));
+        const start = input.selectionStart || 0;
+        const end = input.selectionEnd || 0;
+        const value = input.value;
+        const newValue = sanitizeNumeroValue(value.slice(0, start) + paste + value.slice(end));
+        input.value = newValue;
+        const ok = numeroIsValid(newValue);
+        input.setCustomValidity(ok ? '' : 'Informe o número ou S/N.');
+        updateReview(); refreshSubmitState();
+      });
+      function updateEmailHelp(value, ok){
+        const help = $('#emailHelp');
+        if(help){
+          help.textContent = value ? (ok ? '' : 'Informe um e-mail válido.') : '';
+        }
+      }
+      $('#email').addEventListener('input', e=>{
+        const value = e.target.value.trim();
+        const ok = isValidEmail(value);
+        if(!value){
+          e.target.setCustomValidity('');
+        }else{
+          e.target.setCustomValidity(ok ? '' : 'Informe um e-mail válido.');
+        }
+        updateEmailHelp(value, ok);
+        updateReview(); refreshSubmitState();
+      });
+      $('#email').addEventListener('blur', e=>{
+        const value = e.target.value.trim();
+        const ok = isValidEmail(value);
+        if(value && !ok){
+          alert('E-mail inválido. Verifique e tente novamente.');
+          e.target.value = '';
+          e.target.setCustomValidity('');
+          updateEmailHelp('', true);
+          updateReview();
+          refreshSubmitState();
+          setTimeout(()=>e.target.focus(), 0);
+          return;
+        }
+        updateEmailHelp(value, ok);
       });
 
       function enforceRecife(){
@@ -650,9 +784,19 @@
           input.setCustomValidity('');
         }else{
           alert('Serviço destina-se exclusivamente para moradores da cidade do Recife');
-          input.value = '';
+          ['#cep','#logradouro','#numero','#complemento','#bairro','#cidade','#uf']
+            .forEach(sel => {
+              const field = $(sel);
+              if(field){ field.value = ''; }
+            });
           input.setCustomValidity('Serviço destina-se exclusivamente para moradores da cidade do Recife');
-          input.focus();
+          ( $('#cep') || input ).focus();
+        }
+        const numeroField = $('#numero');
+        if(numeroField){
+          const sanitizedNumero = sanitizeNumeroValue(numeroField.value);
+          numeroField.value = sanitizedNumero;
+          numeroField.setCustomValidity(numeroIsValid(sanitizedNumero) ? '' : 'Informe o número ou S/N.');
         }
         updateReview();
         refreshSubmitState();
@@ -679,6 +823,7 @@
 
         const base = Array.isArray(baseList) ? baseList : [];
         const seen = new Set();
+        const produtosOrdenados = [];
         base
           .map(item => {
             if(typeof item === 'string') return item;
@@ -690,14 +835,17 @@
           .filter(Boolean)
           .forEach(nome => {
             const key = norm(nome);
+            if(key === norm('Outros')) return;
             if(seen.has(key)) return;
             seen.add(key);
-            sel.add(new Option(nome, nome));
+            produtosOrdenados.push(nome);
           });
 
-        if(!seen.has(norm('Outros'))){
-          sel.add(new Option('Outros', 'OUTROS'));
-        }
+        produtosOrdenados
+          .sort((a,b)=>a.localeCompare(b,'pt-BR',{ sensitivity: 'base' }))
+          .forEach(nome => sel.add(new Option(nome, nome)));
+
+        sel.add(new Option('Outros', 'OUTROS'));
         sel.value = '';
       }
 
@@ -716,15 +864,36 @@
         const tipoSelect = document.getElementById('tipoCadastro');
         const option = tipoSelect ? tipoSelect.selectedOptions[0] : null;
         const tipoId = option ? (option.dataset?.productsId || option.value || '').trim() : '';
+        const isEconomiaSolidaria = tipoId === 'economia-solidaria';
+        const produtoSection = document.getElementById('produtoSection');
+        if(produtoSection){
+          produtoSection.classList.toggle('d-none', isEconomiaSolidaria);
+        }
+
+        if(isEconomiaSolidaria){
+          sel.required = false;
+          sel.disabled = true;
+          while (sel.options.length) sel.remove(0);
+          sel.add(new Option('Selecione...', ''));
+          sel.value = '';
+          resetProdutoOutro();
+          return;
+        }
 
         if(!tipoId){
           while (sel.options.length) sel.remove(0);
           sel.add(new Option('Selecione o tipo de cadastro...', ''));
           sel.value = '';
           sel.disabled = true;
+          sel.required = false;
+          if(produtoSection){
+            produtoSection.classList.remove('d-none');
+          }
           resetProdutoOutro();
           return;
         }
+
+        sel.required = true;
 
         const payload = { id: tipoId };
 
@@ -859,9 +1028,9 @@
         if(cep.length !== 8) return;
         const data = await lookupCep(cep);
         if(!data) return;
-        $('#logradouro').value=data.logradouro||'';
-        $('#bairro').value=data.bairro||'';
-        $('#cidade').value=(data.cidade||'').toUpperCase();
+        $('#logradouro').value=String(data.logradouro||'').toUpperCase();
+        $('#bairro').value=String(data.bairro||'').toUpperCase();
+        $('#cidade').value=String(data.cidade||'').toUpperCase();
         enforceRecife();
         $('#uf').value=(data.uf||'').toUpperCase();
         updateReview();
@@ -894,6 +1063,15 @@
         const tipoCadastro = esc(tipoOption ? tipoOption.textContent : tipoSel?.value || '');
         const genero = esc($('#genero').value==='OUTRO' ? $('#generoOutro').value : $('#genero').value);
         const nascimentoFmt = fmtDateBR($('#nascimento').value);
+        const enderecoPartes = [];
+        if(cep) enderecoPartes.push(cep);
+        const logNumero = [log, num].filter(Boolean).join(', ');
+        if(logNumero) enderecoPartes.push(logNumero);
+        if(bai) enderecoPartes.push(bai);
+        const cidadeUf = [cid, uf].filter(Boolean).join('/');
+        if(cidadeUf) enderecoPartes.push(cidadeUf);
+        const enderecoResumo = enderecoPartes.join(' • ');
+        const tipoProdutoResumo = [tipoCadastro, prod].filter(Boolean).join(' • ');
         $('#reviewBlock').innerHTML = `
           <h6>Resumo</h6>
           <table class="table table-sm review-table">
@@ -903,9 +1081,9 @@
               <tr><td><strong>Nascimento</strong></td><td>${esc(nascimentoFmt)}</td></tr>
               <tr><td><strong>E-mail</strong></td><td>${email}</td></tr>
               <tr><td><strong>Celular</strong></td><td>${tel}</td></tr>
-              <tr><td><strong>Endereço</strong></td><td>${cep} — ${log}, ${num} — ${bai} — ${cid}/${uf}</td></tr>
-              <tr><td><strong>Tipo de cadastro / Produto</strong></td><td>${tipoCadastro} / ${prod}</td></tr>
-              <tr><td><strong>Gênero</strong></td><td>${genero||'—'}</td></tr>
+              <tr><td><strong>Endereço</strong></td><td>${enderecoResumo}</td></tr>
+              <tr><td><strong>Tipo de cadastro • Produto</strong></td><td>${tipoProdutoResumo}</td></tr>
+              <tr><td><strong>Gênero</strong></td><td>${genero}</td></tr>
             </tbody>
           </table>`;
       }
@@ -941,8 +1119,10 @@
         const assocSim = document.getElementById('assocSim').checked;
         const assocDescOk = !assocSim || (!!($('#assocDesc').value||'').trim());
         const cityOk = isRecifeCity($('#cidade').value);
+        const termoEl = $('#termoResponsabilidade');
+        const termoOk = termoEl ? termoEl.checked : false;
 
-        const allOk = requiredFilled && cpfOk && celOk && emailOk && nascimentoOk && cnpjOk && certReqOk && produtoOutroOk && generoOutroOk && divulgOrgOk && divulgOutroOk && assocDescOk && cityOk;
+        const allOk = requiredFilled && cpfOk && celOk && emailOk && nascimentoOk && cnpjOk && certReqOk && produtoOutroOk && generoOutroOk && divulgOrgOk && divulgOutroOk && assocDescOk && cityOk && termoOk;
         const btn=$('#btnSubmitAll');
         btn.disabled = !allOk; btn.classList.toggle('btn-success', allOk); btn.classList.toggle('btn-secondary', !allOk);
       }
@@ -955,7 +1135,7 @@
         '#carteiraSim','#carteiraNao','#numCarteira','#instagram','#marca','#meiSim','#meiNao','#cnpj','#fantasia',
         '#formSim','#formNao','#abrirMeiSim','#abrirMeiNao','#divulgacao','#organizador','#comoSoube',
         '#assocSim','#assocNao','#assocDesc',
-        '#docFrente','#docVerso','#compDomicilio','#certMeiCnpj','#foto1','#foto2','#foto3','#foto4','#sobreTrabalho','#tempoAtv','#renda'
+        '#docFrente','#docVerso','#compDomicilio','#certMeiCnpj','#foto1','#foto2','#foto3','#foto4','#sobreTrabalho','#tempoAtv','#renda','#termoResponsabilidade'
       ];
       selectors.forEach(sel=>{ const el=$(sel); if(!el) return; allWatch.forEach(evt=> el.addEventListener(evt, ()=>{ updateReview(); refreshSubmitState(); })); });
 
@@ -1020,6 +1200,7 @@
           fd.append('divulgacao', $('#divulgacao').value);
           fd.append('organizador', $('#organizador').value);
           fd.append('como_soube', $('#comoSoube').value);
+          fd.append('termo_responsabilidade', document.getElementById('termoResponsabilidade')?.checked ? 'ACEITO' : 'NAO');
 
           // Anexos
           const f = id => document.getElementById(id).files[0];
@@ -1043,6 +1224,14 @@
         loadDraft();
         toggleAssocDesc();
         enforceRecife();
+        const emailValue = ($('#email')?.value || '').trim();
+        updateEmailHelp(emailValue, isValidEmail(emailValue));
+        const numeroEl = $('#numero');
+        if(numeroEl){
+          const sanitizedNumero = sanitizeNumeroValue(numeroEl.value);
+          numeroEl.value = sanitizedNumero;
+          numeroEl.setCustomValidity(numeroIsValid(sanitizedNumero) ? '' : 'Informe o número ou S/N.');
+        }
         updateReview();
         refreshSubmitState();
         loadProducts();
