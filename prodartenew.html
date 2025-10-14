@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PRODARTE — Inscrição / Recadastramento</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+      :root{
+        --brand:#0d6efd; --brand-dark:#0b5ed7; --bg:#f9fbff; --text:#0b2447; --muted:#6c757d;
+        --stage-w:1379px;
+        --pattern-w:1366px;
+      }
+      body{
+        background:
+          radial-gradient(1200px 600px at -10% -10%, #f0f8ff 0%, #ffffff 60%),
+          radial-gradient(800px 500px at 110% 0%, #f3f7ff 0%, #ffffff 60%),
+          linear-gradient(180deg,#ffffff 0%, #f9fbff 100%);
+        min-height:100vh;
+      }
+      .stage{ width:var(--stage-w); margin:0 auto; position:relative; left:-6px; }
+      header.hero{ width:var(--stage-w); height:240px; background:url('https://statics.recife.pe.gov.br/images/dynamics/zonaazul/banner.jpeg') center/cover no-repeat; }
+      .pattern-strip{ width:var(--pattern-w); margin:0 auto; position:relative; left:-6px; background:url('https://statics.recife.pe.gov.br/images/dynamics/zonaazul/background.jpeg') repeat center/900px auto; }
+      .pattern-top{ height:135px; opacity:.4; }
+      .pattern-bottom{ height:135px; opacity:.4; }
+      .card-form{ border:0; border-radius:1rem; box-shadow:0 12px 34px rgba(13,110,253,.12), 0 6px 16px rgba(13,110,253,.08); overflow:hidden; }
+      .card-form .card-header{ background:linear-gradient(180deg,#ffffff 0%, #f6f9ff 100%); border-bottom:1px solid #eef3ff; }
+      .required::after{ content:" *"; color:#dc3545; font-weight:600; }
+      .help{ font-size:.9rem; color:#6c757d; }
+      .section-title{ font-weight:700; letter-spacing:.2px; color:#0b2447; }
+      .dropzone{ border:2px dashed #cfe2ff; border-radius:.75rem; padding:1rem; background:#f8fbff; }
+      .form-control:focus,.form-select:focus{ box-shadow:0 0 0 .25rem rgba(13,110,253,.15); border-color:var(--brand); }
+      pre.json{ background:#0b1020; color:#e6edf3; border-radius:.75rem; padding:1rem; max-height:40vh; overflow:auto; }
+      .badge-soft{ background:#e7f1ff; color:#0b2447; border:1px solid #cfe2ff; }
+      .form-control[readonly]{ background:#f8f9fa; }
+      .review-table td{ vertical-align: top; }
+      .frame-card{
+        max-width: 980px;
+        background:#ffffff;
+        border-radius:1rem;
+        box-shadow:0 18px 40px rgba(13,110,253,.12), 0 8px 22px rgba(13,110,253,.08);
+        padding:2rem;
+        position:relative; z-index:2;
+        margin:-90px auto -90px !important;
+      }
+      .subtle{ color:#6c757d; font-weight:500; letter-spacing:.2px; }
+      .floating-save{ position:fixed; right:1rem; bottom:1rem; z-index:50; }
+      @media (max-width: 992px){
+        :root{ --stage-w:100vw; --pattern-w:100vw; }
+        .stage, .pattern-strip{ left:0; }
+        header.hero{ background-position:center; background-size:cover; }
+        body{ overflow-x:hidden; }
+        .frame-card{ margin:-60px auto -60px; padding:1.25rem; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="hero stage"></header>
+    <div class="pattern-strip pattern-top"></div>
+
+    <main class="container my-4 frame-card" id="app">
+      <h2 class="h4 text-center mb-0">PRODARTE</h2>
+      <p class="text-center subtle mb-4">Inscrição / Recadastramento de Artesãos(as) e Empreendedores(as)</p>
+
+      <!-- Seção 1: Tipo de inscrição -->
+      <div class="card card-form mb-4">
+        <div class="card-header">
+          <h2 class="h5 mb-0">Tipo de Inscrição</h2>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label required d-block">Selecione o tipo de inscrição</label>
+              <div class="d-flex gap-3">
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="tipoInscricao" id="inscNova" value="NOVA" checked>
+                  <label class="form-check-label" for="inscNova">Nova inscrição</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="tipoInscricao" id="inscRec" value="RECAD">
+                  <label class="form-check-label" for="inscRec">Recadastramento</label>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label required" for="tipoCadastro">Tipo de cadastro</label>
+              <select id="tipoCadastro" class="form-select" required>
+                <option value="" data-products-id="" selected>Selecione...</option>
+                <option value="empreendedor" data-products-id="empreendedor">Empreendedor</option>
+                <option value="economia-solidaria" data-products-id="economia-solidaria">Empreendedor: Economia solidária</option>
+                <option value="artesanato" data-products-id="artesanato">Artesão</option>
+                <option value="gastronomia" data-products-id="gastronomia">Gastronomia</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seção 2: Produto -->
+      <div class="card card-form mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h2 class="h5 mb-0">Produto</h2>
+          <span class="badge badge-soft">Campos dinâmicos</span>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label required" for="produto">Escolha o produto</label>
+              <select id="produto" class="form-select" required disabled>
+                <option value="" selected>Selecione...</option>
+                <option value="OUTROS">Outros</option>
+              </select>
+            </div>
+            <div class="col-md-6 d-none" id="produtoOutroWrap">
+              <label class="form-label required" for="produtoOutro">Informe qual é o produto</label>
+              <input type="text" id="produtoOutro" class="form-control" placeholder="Descreva o produto">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seção 3: Identificação Pessoal -->
+      <div class="card card-form mb-4">
+        <div class="card-header">
+          <h2 class="h5 mb-0">Dados Pessoais</h2>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-3">
+              <label class="form-label required" for="cpf">CPF</label>
+              <input type="text" inputmode="numeric" maxlength="14" class="form-control" id="cpf" placeholder="Somente números" required>
+              <div class="help" id="cpfHelp"></div>
+            </div>
+            <div class="col-md-5">
+              <label class="form-label required" for="nome">Nome</label>
+              <input type="text" class="form-control" id="nome" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label" for="nomeSocial">Nome Social (opcional)</label>
+              <input type="text" class="form-control" id="nomeSocial">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label" for="rg">Documento de Identidade</label>
+              <input type="text" class="form-control" id="rg">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label required" for="genero">Identidade de gênero</label>
+              <select id="genero" class="form-select" required>
+                <option value="" selected>Selecione...</option>
+                <option>Feminino</option>
+                <option>Masculino</option>
+                <option>Não-binário</option>
+                <option>Prefiro não informar</option>
+                <option value="OUTRO">Outro</option>
+              </select>
+            </div>
+            <div class="col-md-4 d-none" id="generoOutroWrap">
+              <label class="form-label required" for="generoOutro">Informe a identidade de gênero</label>
+              <select id="generoOutro" class="form-select">
+                <option value="" selected>Selecione...</option>
+                <option>Agênero</option>
+                <option>Gênero fluido</option>
+                <option>Transfeminino</option>
+                <option>Transmasculino</option>
+                <option>Outro (especificar na descrição)</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label required" for="mae">Nome da mãe</label>
+              <input type="text" class="form-control" id="mae" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="pai">Nome do pai</label>
+              <input type="text" class="form-control" id="pai">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label required" for="nascimento">Data de Nascimento</label>
+              <input type="date" class="form-control" id="nascimento" required>
+            </div>
+            <div class="col-md-5">
+              <label class="form-label required" for="email">E-mail</label>
+              <input type="email" class="form-control" id="email" placeholder="nome@exemplo.com" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label required" for="celular">Celular</label>
+              <input type="text" inputmode="numeric" pattern="\\d*" maxlength="11" class="form-control" id="celular" placeholder="DDD + número (apenas dígitos)" required>
+              <div class="help" id="celHelp"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seção 4: Endereço -->
+      <div class="card card-form mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h2 class="h5 mb-0">Endereço</h2>
+          <span class="badge badge-soft">ViaCEP / BrasilAPI automáticos</span>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-3">
+              <label class="form-label required" for="cep">CEP</label>
+              <input type="text" class="form-control" id="cep" placeholder="00000-000" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label required" for="logradouro">Logradouro (Rua, Avenida, Travessa)</label>
+              <input type="text" class="form-control" id="logradouro" required>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label required" for="numero">Número</label>
+              <input type="text" class="form-control" id="numero" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label" for="complemento">Complemento</label>
+              <input type="text" class="form-control" id="complemento">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label required" for="bairro">Bairro</label>
+              <input type="text" class="form-control" id="bairro" required>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label required" for="cidade">Cidade</label>
+              <input type="text" class="form-control" id="cidade" required>
+            </div>
+            <div class="col-md-1">
+              <label class="form-label required" for="uf">Estado</label>
+              <input type="text" class="form-control" id="uf" maxlength="2" required>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seção 5: Presença Digital / Marca -->
+      <div class="card card-form mb-4">
+        <div class="card-header">
+          <h2 class="h5 mb-0">Marca e Presença Digital</h2>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label" for="carteiraArt">Possui Carteira de Artesão</label>
+              <div class="d-flex gap-3">
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="carteiraArt" id="carteiraSim" value="SIM">
+                  <label class="form-check-label" for="carteiraSim">Sim</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="carteiraArt" id="carteiraNao" value="NAO" checked>
+                  <label class="form-check-label" for="carteiraNao">Não</label>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label" for="numCarteira">Nº da Carteira</label>
+              <input type="text" id="numCarteira" class="form-control" placeholder="Se aplicável" disabled>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label" for="marca">Nome da marca (opcional)</label>
+              <input type="text" id="marca" class="form-control" placeholder="Seu nome de marca">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="instagram">Instagram</label>
+              <input type="text" id="instagram" class="form-control" placeholder="@usuario ou link">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seção 6: MEI / Empresa -->
+      <div class="card card-form mb-4">
+        <div class="card-header">
+          <h2 class="h5 mb-0">Formalização</h2>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label d-block">Possui MEI</label>
+              <div class="d-flex gap-3">
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="temMei" id="meiSim" value="SIM">
+                  <label class="form-check-label" for="meiSim">Sim</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="temMei" id="meiNao" value="NAO" checked>
+                  <label class="form-check-label" for="meiNao">Não</label>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label" for="cnpj">CNPJ</label>
+              <input type="text" id="cnpj" class="form-control" placeholder="Somente números" disabled>
+              <div class="help" id="cnpjHelp"></div>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label" for="fantasia">Nome fantasia</label>
+              <input type="text" id="fantasia" class="form-control" placeholder="Se houver" disabled>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label d-block">Deseja formalizar</label>
+              <div class="d-flex gap-3">
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="formalizar" id="formSim" value="SIM">
+                  <label class="form-check-label" for="formSim">Sim</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="formalizar" id="formNao" value="NAO" checked>
+                  <label class="form-check-label" for="formNao">Não</label>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label d-block">Deseja abrir o MEI agora</label>
+              <div class="d-flex gap-3">
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="abrirMei" id="abrirMeiSim" value="SIM">
+                  <label class="form-check-label" for="abrirMeiSim">Sim</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="abrirMei" id="abrirMeiNao" value="NAO" checked>
+                  <label class="form-check-label" for="abrirMeiNao">Não</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seção 7: Uploads -->
+      <div class="card card-form mb-4">
+        <div class="card-header">
+          <h2 class="h5 mb-0">Envio de Documentos</h2>
+        </div>
+        <div class="card-body">
+          <div class="row g-3 align-items-stretch">
+            <div class="col-12">
+              <label class="form-label required">Documento Oficial (Frente)</label>
+              <div class="dropzone">
+                <input class="form-control" type="file" id="docFrente" accept="image/*,application/pdf" capture="environment">
+              </div>
+            </div>
+            <div class="col-12">
+              <label class="form-label required">Documento Oficial (Verso)</label>
+              <div class="dropzone">
+                <input class="form-control" type="file" id="docVerso" accept="image/*,application/pdf" capture="environment">
+              </div>
+            </div>
+            <div class="col-12">
+              <label class="form-label required">Comprovante de Domicílio</label>
+              <div class="dropzone">
+                <input class="form-control" type="file" id="compDomicilio" accept="image/*,application/pdf" capture="environment">
+              </div>
+            </div>
+            <div class="col-12">
+              <label class="form-label" id="certLabel">Certificado do MEI OU CNPJ</label>
+              <div class="dropzone">
+                <input class="form-control" type="file" id="certMeiCnpj" accept="image/*,application/pdf" capture="environment">
+              </div>
+              <div class="help" id="certHelp">Obrigatório quando possuir MEI ou CNPJ informado.</div>
+            </div>
+          </div>
+          <hr class="my-4">
+          <h3 class="h6 section-title mb-2">Portfólio (Fotos do Trabalho)</h3>
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label required">Foto 1</label>
+              <div class="dropzone"><input class="form-control" type="file" id="foto1" accept="image/*" capture="environment"></div>
+            </div>
+            <div class="col-12">
+              <label class="form-label required">Foto 2</label>
+              <div class="dropzone"><input class="form-control" type="file" id="foto2" accept="image/*" capture="environment"></div>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Foto 3</label>
+              <div class="dropzone"><input class="form-control" type="file" id="foto3" accept="image/*" capture="environment"></div>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Foto 4</label>
+              <div class="dropzone"><input class="form-control" type="file" id="foto4" accept="image/*" capture="environment"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seção 8: Associação e Descrições -->
+      <div class="card card-form mb-4">
+        <div class="card-header">
+          <h2 class="h5 mb-0">Pertencimento e Descrição</h2>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label d-block">Pertence a alguma associação ou cooperativa</label>
+              <div class="d-flex gap-3">
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="associacao" id="assocSim" value="SIM">
+                  <label class="form-check-label" for="assocSim">Sim</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="associacao" id="assocNao" value="NAO" checked>
+                  <label class="form-check-label" for="assocNao">Não</label>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 d-none" id="assocDescWrap">
+              <label class="form-label" for="assocDesc">Descreva associação ou cooperativa que pertence</label>
+              <textarea id="assocDesc" rows="2" class="form-control" placeholder="Nome, cidade, função, tempo de participação..."></textarea>
+            </div>
+            <div class="col-12">
+              <label class="form-label required" for="sobreTrabalho">Fale sobre o seu trabalho</label>
+              <textarea id="sobreTrabalho" rows="4" class="form-control" required placeholder="Técnicas, materiais, temática, público, diferencial..."></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seção 9: Tempo, Renda e Divulgação -->
+      <div class="card card-form mb-4">
+        <div class="card-header">
+          <h2 class="h5 mb-0">Tempo de Atividade, Renda e Divulgação</h2>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label required" for="tempoAtv">Tempo de atividade</label>
+              <select id="tempoAtv" class="form-select" required>
+                <option value="" selected>Selecione...</option>
+                <option>&lt; 6 meses</option>
+                <option>6–12 meses</option>
+                <option>1–2 anos</option>
+                <option>3–5 anos</option>
+                <option>&gt; 5 anos</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label required" for="renda">Rendimento médio mensal</label>
+              <select id="renda" class="form-select" required>
+                <option value="" selected>Selecione...</option>
+                <option>Até 1 SM</option>
+                <option>1–2 SM</option>
+                <option>2–3 SM</option>
+                <option>3–5 SM</option>
+                <option>&gt; 5 SM</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label required" for="divulgacao">Como ficou sabendo do cadastro PRODARTE</label>
+              <select id="divulgacao" class="form-select" required>
+                <option value="" selected>Selecione...</option>
+                <option value="REDE_SOCIAL">Redes sociais</option>
+                <option value="SITE_PCR">Site/Portal PCR</option>
+                <option value="EVENTO_ORG">Evento/Organização</option>
+                <option value="INDICACAO">Indicação</option>
+                <option value="OUTRO">Outro</option>
+              </select>
+            </div>
+            <div class="col-md-6 d-none" id="orgWrap">
+              <label class="form-label required" for="organizador">Especificar organizador (a)</label>
+              <select id="organizador" class="form-select">
+                <option value="" selected>Selecione...</option>
+                <option>SESAU</option>
+                <option>Secretaria de Cultura</option>
+                <option>Emprel</option>
+                <option>CARP (Casa do Artesão)</option>
+                <option>Outro órgão/ONG</option>
+              </select>
+            </div>
+            <div class="col-md-6 d-none" id="comoWrap">
+              <label class="form-label required" for="comoSoube">Informe como ficou sabendo</label>
+              <select id="comoSoube" class="form-select">
+                <option value="" selected>Selecione...</option>
+                <option>WhatsApp</option>
+                <option>Facebook</option>
+                <option>Instagram</option>
+                <option>Amigo(a)/Familiar</option>
+                <option>Outro meio</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seção 10: Revisão e Envio -->
+      <div class="card card-form mb-5">
+        <div class="card-header">
+          <h2 class="h5 mb-0">Revisão e envio</h2>
+        </div>
+        <div class="card-body">
+          <div id="reviewBlock" class="mb-3"></div>
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-secondary" id="btnSubmitAll" disabled>Enviar dados</button>
+            <div id="finalStatus" class="ms-2"></div>
+          </div>
+          <pre class="json mt-3 d-none" id="finalOut"></pre>
+        </div>
+      </div>
+
+      <div class="text-center text-muted mb-5">Este formulário realiza pré-validações e coleta de dados para o cadastro PRODARTE.</div>
+    </main>
+
+    <div class="pattern-strip pattern-bottom"></div>
+
+    <button class="btn btn-primary rounded-pill shadow floating-save" id="quickSave" type="button">Salvar rascunho</button>
+
+    <script>
+      const FINAL_ENDPOINT = "https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/cadastro-prodarte";
+      const PRODUCTS_ENDPOINT = "https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/prodarte-produtos";
+
+      // Utils -------------------------------------------------------------
+      const $ = (sel) => document.querySelector(sel);
+      const onlyDigits = (s) => (s||'').replace(/\\D+/g, '');
+      const normalize = (value) => (value||'').normalize('NFD').replace(/\p{Diacritic}/gu, '').toUpperCase().trim();
+      const esc = s => { const d=document.createElement('div'); d.innerText=s??''; return d.innerHTML||'—'; };
+      const fmtCPF = v => { const d = onlyDigits(v||''); return d.length===11 ? d.replace(/(\\d{3})(\\d{3})(\\d{3})(\\d{2})/,'$1.$2.$3-$4') : (d||'—'); };
+      const fmtCEP = v => { const d = onlyDigits(v||''); return d.length===8 ? d.replace(/(\\d{5})(\\d{3})/,'$1-$2') : (d||'—'); };
+      const fmtDateBR = (value) => {
+        if(!value) return '—';
+        const parts = String(value).split('-');
+        if(parts.length === 3){
+          const [y,m,d] = parts;
+          if(y && m && d){
+            return `${d.padStart(2,'0')}/${m.padStart(2,'0')}/${y}`;
+          }
+        }
+        const dt = new Date(value);
+        if(!Number.isNaN(dt.getTime())){
+          return new Intl.DateTimeFormat('pt-BR').format(dt);
+        }
+        return value;
+      };
+
+      // Normalização para produtos ---------------------------------------
+      const norm = (s) => String(s || '')
+        .normalize('NFD')
+        .replace(/[\\u0300-\\u036f]/g, '')
+        .trim()
+        .toLowerCase();
+
+      // Validators --------------------------------------------------------
+      function isValidCPF(cpf){
+        cpf = onlyDigits(cpf);
+        if(!cpf || cpf.length !== 11) return false;
+        if(/^(\\d)\\1+$/.test(cpf)) return false;
+        let soma=0, rest;
+        for(let i=1;i<=9;i++) soma += parseInt(cpf.substring(i-1,i))*(11-i);
+        rest=(soma*10)%11; if(rest===10||rest===11) rest=0; if(rest!==parseInt(cpf.substring(9,10))) return false;
+        soma=0; for(let i=1;i<=10;i++) soma += parseInt(cpf.substring(i-1,i))*(12-i);
+        rest=(soma*10)%11; if(rest===10||rest===11) rest=0; if(rest!==parseInt(cpf.substring(10,11))) return false;
+        return true;
+      }
+      function isValidCNPJ(cnpj){
+        cnpj = onlyDigits(cnpj);
+        if(!cnpj || cnpj.length !== 14) return false;
+        if(/^(\\d)\\1+$/.test(cnpj)) return false;
+        let tamanho = cnpj.length - 2;
+        let numeros = cnpj.substring(0,tamanho);
+        let digitos = cnpj.substring(tamanho);
+        let soma = 0;
+        let pos = tamanho - 7;
+        for (let i = tamanho; i >= 1; i--){ soma += numeros.charAt(tamanho - i) * pos--; if (pos < 2) pos = 9; }
+        let resultado = soma % 11 < 2 ? 0 : 11 - soma % 11; if (resultado != digitos.charAt(0)) return false;
+        tamanho = tamanho + 1; numeros = cnpj.substring(0,tamanho); soma = 0; pos = tamanho - 7;
+        for (let i = tamanho; i >= 1; i--){ soma += numeros.charAt(tamanho - i) * pos--; if (pos < 2) pos = 9; }
+        resultado = soma % 11 < 2 ? 0 : 11 - soma % 11; if (resultado != digitos.charAt(1)) return false;
+        return true;
+      }
+      function isValidCell(v){
+        const d = onlyDigits(v);
+        return /^(?:[1-9][0-9])9[0-9]{8}$/.test(d);
+      }
+      function isValidEmail(v){
+        return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(v||'').trim());
+      }
+      function isRecifeCity(value){
+        if(!value) return false;
+        return normalize(value) === 'RECIFE';
+      }
+      function isAdult(dateStr){
+        if(!dateStr) return false;
+        const parts = String(dateStr).split('-');
+        if(parts.length !== 3) return false;
+        const [y,m,d] = parts.map(Number);
+        if(!y || !m || !d) return false;
+        const birth = new Date(y, m - 1, d);
+        if(Number.isNaN(birth.getTime())) return false;
+        const today = new Date();
+        let age = today.getFullYear() - birth.getFullYear();
+        const monthDiff = today.getMonth() - birth.getMonth();
+        if(monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())){
+          age--;
+        }
+        return age >= 18;
+      }
+
+      // Upper/Lower transforms -------------------------------------------
+      function toUpperLive(id){ const el=$(id); el.addEventListener('input', e=>{ e.target.value = (e.target.value||'').toUpperCase(); updateReview(); }); }
+      function toLowerLive(id){ const el=$(id); el.addEventListener('input', e=>{ e.target.value = (e.target.value||'').toLowerCase(); updateReview(); }); }
+
+      // Bind transforms
+      ['#nome','#nomeSocial','#mae','#pai','#logradouro','#numero','#bairro','#complemento','#cidade','#uf','#marca','#fantasia']
+        .forEach(toUpperLive);
+      ['#email','#instagram']
+        .forEach(toLowerLive);
+
+      // Masks/validations live
+      $('#cpf').addEventListener('input', e=>{ e.target.value=onlyDigits(e.target.value).slice(0,11); const ok=isValidCPF(e.target.value); $('#cpfHelp').textContent = ok? '' : 'CPF inválido'; updateReview(); refreshSubmitState(); });
+      $('#celular').addEventListener('input', e=>{
+        const digits = onlyDigits(e.target.value).slice(0,11);
+        e.target.value = digits;
+        const ok = isValidCell(digits);
+        $('#celHelp').textContent = ok? '' : 'Informe um celular válido com DDD (11 dígitos).';
+        e.target.setCustomValidity(ok ? '' : 'Informe um celular válido com DDD.');
+        updateReview(); refreshSubmitState();
+      });
+      $('#celular').addEventListener('keydown', e=>{
+        if(e.ctrlKey || e.metaKey || e.altKey) return;
+        const allowedKeys = ['Backspace','Tab','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Delete','Home','End'];
+        if(allowedKeys.includes(e.key)) return;
+        if(/^[0-9]$/.test(e.key)) return;
+        e.preventDefault();
+      });
+      $('#celular').addEventListener('paste', e=>{
+        e.preventDefault();
+        const input = e.target;
+        const paste = onlyDigits(e.clipboardData.getData('text'));
+        const start = input.selectionStart || 0;
+        const end = input.selectionEnd || 0;
+        const value = input.value;
+        const newValue = (value.slice(0, start) + paste + value.slice(end)).slice(0,11);
+        input.value = newValue;
+        const newPos = Math.min(start + paste.length, newValue.length);
+        requestAnimationFrame(()=>{ input.setSelectionRange(newPos, newPos); input.dispatchEvent(new Event('input', { bubbles: true })); });
+      });
+      $('#email').addEventListener('input', e=>{
+        const ok = isValidEmail(e.target.value);
+        e.target.setCustomValidity(ok ? '' : 'Informe um e-mail válido.');
+        updateReview(); refreshSubmitState();
+      });
+
+      function enforceRecife(){
+        const input = $('#cidade');
+        if(!input) return;
+        const value = input.value.trim();
+        if(!value){
+          input.setCustomValidity('');
+          return;
+        }
+        if(isRecifeCity(value)){
+          input.value = value.toUpperCase();
+          input.setCustomValidity('');
+        }else{
+          alert('Serviço destina-se exclusivamente para moradores da cidade do Recife');
+          input.value = '';
+          input.setCustomValidity('Serviço destina-se exclusivamente para moradores da cidade do Recife');
+          input.focus();
+        }
+        updateReview();
+        refreshSubmitState();
+      }
+
+      $('#cidade').addEventListener('blur', enforceRecife);
+      $('#cidade').addEventListener('change', enforceRecife);
+      $('#nascimento').addEventListener('change', e=>{
+        const value = e.target.value;
+        if(value && !isAdult(value)){
+          alert('A inscrição é permitida apenas para pessoas com 18 anos ou mais.');
+          e.target.value = '';
+          e.target.focus();
+        }
+        updateReview();
+        refreshSubmitState();
+      });
+
+      // Produtos (carregar e filtrar) ------------------------------------
+      function populateProductsFromResponse(baseList){
+        const sel = document.getElementById('produto');
+        while (sel.options.length) sel.remove(0);
+        sel.add(new Option('Selecione...',''));
+
+        const base = Array.isArray(baseList) ? baseList : [];
+        const seen = new Set();
+        base
+          .map(item => {
+            if(typeof item === 'string') return item;
+            if(item && typeof item === 'object'){
+              return String(item.produto || item.nome || item.label || '').trim();
+            }
+            return '';
+          })
+          .filter(Boolean)
+          .forEach(nome => {
+            const key = norm(nome);
+            if(seen.has(key)) return;
+            seen.add(key);
+            sel.add(new Option(nome, nome));
+          });
+
+        if(!seen.has(norm('Outros'))){
+          sel.add(new Option('Outros', 'OUTROS'));
+        }
+        sel.value = '';
+      }
+
+      function resetProdutoOutro(){
+        document.getElementById('produtoOutroWrap').classList.add('d-none');
+        document.getElementById('produtoOutro').required = false;
+        document.getElementById('produtoOutro').value = '';
+      }
+
+      async function loadProducts(){
+        const sel = document.getElementById('produto');
+        sel.disabled = true;
+        while (sel.options.length) sel.remove(0);
+        sel.add(new Option('Carregando...', ''));
+
+        const tipoSelect = document.getElementById('tipoCadastro');
+        const option = tipoSelect ? tipoSelect.selectedOptions[0] : null;
+        const tipoId = option ? (option.dataset?.productsId || option.value || '').trim() : '';
+
+        if(!tipoId){
+          while (sel.options.length) sel.remove(0);
+          sel.add(new Option('Selecione o tipo de cadastro...', ''));
+          sel.value = '';
+          sel.disabled = true;
+          resetProdutoOutro();
+          return;
+        }
+
+        const payload = { id: tipoId };
+
+        let products = [];
+        try{
+          const res = await fetch(PRODUCTS_ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+            cache: 'no-store'
+          });
+          if(!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          products = Array.isArray(data) ? data : (data?.items || data?.itens || []);
+        }catch(e){
+          console.warn('Falha ao carregar produtos:', e);
+          products = [];
+        }
+
+        populateProductsFromResponse(products);
+        sel.disabled = false;
+        resetProdutoOutro();
+      }
+
+      document.getElementById('produto').addEventListener('change', (e)=>{
+        const outro = e.target.value === 'OUTROS';
+        document.getElementById('produtoOutroWrap').classList.toggle('d-none', !outro);
+        document.getElementById('produtoOutro').required = outro;
+        if(!outro){ document.getElementById('produtoOutro').value=''; }
+        updateReview(); refreshSubmitState();
+      });
+
+      document.getElementById('tipoCadastro').addEventListener('change', ()=>{
+        loadProducts();
+        updateReview(); refreshSubmitState();
+      });
+
+      // Gênero Outro toggle
+      $('#genero').addEventListener('change', (e)=>{
+        const outro = e.target.value === 'OUTRO';
+        $('#generoOutroWrap').classList.toggle('d-none', !outro);
+        $('#generoOutro').required = outro;
+        refreshSubmitState();
+      });
+
+      // Carteira Artesão toggle
+      document.querySelectorAll('input[name="carteiraArt"]').forEach(r=>{
+        r.addEventListener('change', ()=>{
+          const sim = document.getElementById('carteiraSim').checked;
+          $('#numCarteira').disabled = !sim; $('#numCarteira').required = sim; if(!sim) $('#numCarteira').value='';
+        });
+      });
+
+      // MEI toggle
+      document.querySelectorAll('input[name="temMei"]').forEach(r=>{
+        r.addEventListener('change', ()=>{
+          const sim = document.getElementById('meiSim').checked;
+          ['#cnpj','#fantasia'].forEach(sel=>{ const el=$(sel); el.disabled=!sim; el.required=sim; if(!sim) el.value=''; });
+          $('#certMeiCnpj').required = sim; // certificado exigido quando possui MEI
+          refreshSubmitState(); updateReview();
+        });
+      });
+
+      // Associação toggle
+      function toggleAssocDesc(){
+        const sim = document.getElementById('assocSim').checked;
+        const wrap = document.getElementById('assocDescWrap');
+        const field = document.getElementById('assocDesc');
+        if(!wrap || !field) return;
+        wrap.classList.toggle('d-none', !sim);
+        field.required = sim;
+        if(!sim){ field.value = ''; }
+      }
+      document.querySelectorAll('input[name="associacao"]').forEach(r=>{
+        r.addEventListener('change', ()=>{ toggleAssocDesc(); updateReview(); refreshSubmitState(); });
+      });
+
+      // CNPJ live validation
+      $('#cnpj').addEventListener('input', e=>{
+        e.target.value=onlyDigits(e.target.value).slice(0,14);
+        const ok = !e.target.value || isValidCNPJ(e.target.value);
+        $('#cnpjHelp').textContent = ok? '' : 'CNPJ inválido';
+        refreshSubmitState(); updateReview();
+      });
+
+      // CEP auto-preenchimento (ViaCEP + BrasilAPI)
+      $('#cep').addEventListener('input', e=>{ e.target.value=onlyDigits(e.target.value).slice(0,8); updateReview(); });
+
+      async function lookupCep(cep){
+        const normalized = onlyDigits(cep);
+        if(normalized.length !== 8) return null;
+        const providers = [
+          async () => {
+            const res = await fetch(`https://viacep.com.br/ws/${normalized}/json/`);
+            if(!res.ok) throw new Error(`ViaCEP HTTP ${res.status}`);
+            const data = await res.json();
+            if(data?.erro) return null;
+            return {
+              logradouro: data.logradouro,
+              bairro: data.bairro,
+              cidade: data.localidade,
+              uf: data.uf
+            };
+          },
+          async () => {
+            const res = await fetch(`https://brasilapi.com.br/api/cep/v1/${normalized}`);
+            if(!res.ok) throw new Error(`BrasilAPI HTTP ${res.status}`);
+            const data = await res.json();
+            if(data?.errors || data?.error || data?.message) return null;
+            return {
+              logradouro: data.street || data.logradouro,
+              bairro: data.neighborhood || data.bairro,
+              cidade: data.city || data.localidade,
+              uf: data.state || data.uf
+            };
+          }
+        ];
+
+        for(const provider of providers){
+          try{
+            const result = await provider();
+            if(result) return result;
+          }catch(err){
+            console.warn('Falha no provedor de CEP:', err);
+          }
+        }
+        return null;
+      }
+
+      async function autofillAddressByCep(){
+        const cep = onlyDigits($('#cep').value);
+        if(cep.length !== 8) return;
+        const data = await lookupCep(cep);
+        if(!data) return;
+        $('#logradouro').value=data.logradouro||'';
+        $('#bairro').value=data.bairro||'';
+        $('#cidade').value=(data.cidade||'').toUpperCase();
+        enforceRecife();
+        $('#uf').value=(data.uf||'').toUpperCase();
+        updateReview();
+        refreshSubmitState();
+      }
+
+      $('#cep').addEventListener('blur', autofillAddressByCep);
+      $('#cep').addEventListener('change', autofillAddressByCep);
+
+      // Divulgação toggles
+      $('#divulgacao').addEventListener('change', e=>{
+        const v=e.target.value;
+        const org = v==='EVENTO_ORG';
+        const outro = v==='OUTRO';
+        $('#orgWrap').classList.toggle('d-none', !org);
+        $('#organizador').required = org;
+        $('#comoWrap').classList.toggle('d-none', !outro);
+        $('#comoSoube').required = outro;
+        refreshSubmitState();
+      });
+
+      // Review ------------------------------------------------------------
+      function updateReview(){
+        const nome=esc($('#nome').value), email=esc(($('#email').value||'').toLowerCase());
+        const cpf=fmtCPF($('#cpf').value), tel=esc(onlyDigits($('#celular').value));
+        const cep=fmtCEP($('#cep').value), log=esc($('#logradouro').value), num=esc($('#numero').value), bai=esc($('#bairro').value), cid=esc($('#cidade').value), uf=esc(($('#uf').value||'').toUpperCase());
+        const prod = esc($('#produto').value==='OUTROS' ? $('#produtoOutro').value : $('#produto').value);
+        const tipoSel = document.getElementById('tipoCadastro');
+        const tipoOption = tipoSel ? tipoSel.selectedOptions[0] : null;
+        const tipoCadastro = esc(tipoOption ? tipoOption.textContent : tipoSel?.value || '');
+        const genero = esc($('#genero').value==='OUTRO' ? $('#generoOutro').value : $('#genero').value);
+        const nascimentoFmt = fmtDateBR($('#nascimento').value);
+        $('#reviewBlock').innerHTML = `
+          <h6>Resumo</h6>
+          <table class="table table-sm review-table">
+            <tbody>
+              <tr><td width="220"><strong>Nome</strong></td><td>${nome}</td></tr>
+              <tr><td><strong>CPF</strong></td><td>${cpf}</td></tr>
+              <tr><td><strong>Nascimento</strong></td><td>${esc(nascimentoFmt)}</td></tr>
+              <tr><td><strong>E-mail</strong></td><td>${email}</td></tr>
+              <tr><td><strong>Celular</strong></td><td>${tel}</td></tr>
+              <tr><td><strong>Endereço</strong></td><td>${cep} — ${log}, ${num} — ${bai} — ${cid}/${uf}</td></tr>
+              <tr><td><strong>Tipo de cadastro / Produto</strong></td><td>${tipoCadastro} / ${prod}</td></tr>
+              <tr><td><strong>Gênero</strong></td><td>${genero||'—'}</td></tr>
+            </tbody>
+          </table>`;
+      }
+
+      // Submit state ------------------------------------------------------
+      function refreshSubmitState(){
+        const requiredFilled = [
+          '#tipoCadastro','#produto','#cpf','#nome','#genero','#mae','#nascimento',
+          '#email','#celular','#cep','#logradouro','#numero','#bairro','#cidade','#uf',
+          '#sobreTrabalho','#tempoAtv','#renda','#divulgacao','#docFrente','#docVerso','#compDomicilio','#foto1','#foto2'
+        ].every(sel=>{
+          const el=$(sel); if(!el) return true; if(el.type==='file') return (el.files||[]).length>0; return !!(el.value && String(el.value).trim());
+        });
+        const cpfOk=isValidCPF($('#cpf').value);
+        const celOk=isValidCell($('#celular').value);
+        const emailOk=isValidEmail($('#email').value);
+        const nascimentoVal = $('#nascimento').value;
+        let nascimentoOk = false;
+        if(nascimentoVal && nascimentoVal.length === 10){
+          nascimentoOk = isAdult(nascimentoVal);
+          $('#nascimento').setCustomValidity(nascimentoOk ? '' : 'É necessário ser maior de 18 anos.');
+        }else{
+          $('#nascimento').setCustomValidity('');
+        }
+        const cnpjIsReq = document.getElementById('meiSim').checked;
+        const cnpjOk = !cnpjIsReq || isValidCNPJ($('#cnpj').value);
+        const certReqOk = !cnpjIsReq || ($('#certMeiCnpj').files||[]).length>0;
+        // campos condicionais
+        const produtoOutroOk = ($('#produto').value!=='OUTROS') || (!!$('#produtoOutro').value.trim());
+        const generoOutroOk = ($('#genero').value!=='OUTRO') || (!!$('#generoOutro').value);
+        const divulgOrgOk = ($('#divulgacao').value!=='EVENTO_ORG') || (!!$('#organizador').value);
+        const divulgOutroOk = ($('#divulgacao').value!=='OUTRO') || (!!$('#comoSoube').value);
+        const assocSim = document.getElementById('assocSim').checked;
+        const assocDescOk = !assocSim || (!!($('#assocDesc').value||'').trim());
+        const cityOk = isRecifeCity($('#cidade').value);
+
+        const allOk = requiredFilled && cpfOk && celOk && emailOk && nascimentoOk && cnpjOk && certReqOk && produtoOutroOk && generoOutroOk && divulgOrgOk && divulgOutroOk && assocDescOk && cityOk;
+        const btn=$('#btnSubmitAll');
+        btn.disabled = !allOk; btn.classList.toggle('btn-success', allOk); btn.classList.toggle('btn-secondary', !allOk);
+      }
+
+      // Files/inputs listeners for submit state + review
+      const allWatch = ['change','input','blur'];
+      const selectors = [
+        '#tipoCadastro','#produto','#produtoOutro','#genero','#generoOutro','#cpf','#nome','#nomeSocial','#rg',
+        '#mae','#pai','#nascimento','#email','#celular','#cep','#logradouro','#numero','#bairro','#cidade','#uf',
+        '#carteiraSim','#carteiraNao','#numCarteira','#instagram','#marca','#meiSim','#meiNao','#cnpj','#fantasia',
+        '#formSim','#formNao','#abrirMeiSim','#abrirMeiNao','#divulgacao','#organizador','#comoSoube',
+        '#assocSim','#assocNao','#assocDesc',
+        '#docFrente','#docVerso','#compDomicilio','#certMeiCnpj','#foto1','#foto2','#foto3','#foto4','#sobreTrabalho','#tempoAtv','#renda'
+      ];
+      selectors.forEach(sel=>{ const el=$(sel); if(!el) return; allWatch.forEach(evt=> el.addEventListener(evt, ()=>{ updateReview(); refreshSubmitState(); })); });
+
+      // Rascunho local ----------------------------------------------------
+      const fieldsForDraft = selectors.filter(s=>!['#docFrente','#docVerso','#compDomicilio','#certMeiCnpj','#foto1','#foto2','#foto3','#foto4'].includes(s));
+      const DRAFT_KEY = 'prodarte_draft_v1';
+      function saveDraft(){ const data={}; fieldsForDraft.forEach(sel=>{ const el=$(sel); if(!el) return; data[sel]=el.value || (el.checked??undefined); }); localStorage.setItem(DRAFT_KEY, JSON.stringify(data)); }
+      function loadDraft(){ try{ const data=JSON.parse(localStorage.getItem(DRAFT_KEY)||'{}'); Object.entries(data).forEach(([sel,val])=>{ const el=$(sel); if(!el) return; if(typeof val==='boolean'){ el.checked=val; } else { el.value=val; } }); }catch(e){} }
+      $('#quickSave').addEventListener('click', ()=>{ saveDraft(); const btn=$('#quickSave'); const old=btn.textContent; btn.textContent='Rascunho salvo'; setTimeout(()=>btn.textContent=old, 1500); });
+
+      // Envio -------------------------------------------------------------
+      async function submitAll(){
+        try{
+          $('#finalStatus').innerHTML = `<span class="badge text-bg-secondary">Enviando...</span>`;
+          const fd = new FormData();
+          // Básicos
+          fd.append('tipo_inscricao', document.querySelector('input[name=tipoInscricao]:checked').value);
+          const tipoSelect = document.getElementById('tipoCadastro');
+          const tipoOption = tipoSelect ? tipoSelect.selectedOptions[0] : null;
+          fd.append('tipo_cadastro', $('#tipoCadastro').value);
+          fd.append('tipo_cadastro_label', tipoOption ? tipoOption.textContent.trim() : '');
+          fd.append('tipo_cadastro_produtos_id', tipoOption ? (tipoOption.dataset?.productsId || '') : '');
+          const produtoFinal = $('#produto').value==='OUTROS' ? $('#produtoOutro').value : $('#produto').value;
+          fd.append('produto', produtoFinal);
+          fd.append('produto_outro', $('#produtoOutro').value.trim());
+
+          fd.append('cpf', onlyDigits($('#cpf').value));
+          fd.append('nome', $('#nome').value.trim());
+          fd.append('nome_social', $('#nomeSocial').value.trim());
+          fd.append('rg', $('#rg').value.trim());
+          fd.append('genero', $('#genero').value==='OUTRO' ? $('#generoOutro').value : $('#genero').value);
+          fd.append('mae', $('#mae').value.trim());
+          fd.append('pai', $('#pai').value.trim());
+          fd.append('nascimento', $('#nascimento').value);
+          fd.append('email', $('#email').value.toLowerCase());
+          fd.append('celular', onlyDigits($('#celular').value));
+
+          fd.append('cep', onlyDigits($('#cep').value));
+          fd.append('logradouro', $('#logradouro').value.trim());
+          fd.append('numero', $('#numero').value.trim());
+          fd.append('complemento', $('#complemento').value.trim());
+          fd.append('bairro', $('#bairro').value.trim());
+          fd.append('cidade', $('#cidade').value.trim());
+          fd.append('uf', $('#uf').value.trim().toUpperCase());
+
+          fd.append('carteira_artesao', document.querySelector('input[name=carteiraArt]:checked')?.value||'NAO');
+          fd.append('num_carteira', $('#numCarteira').value.trim());
+          fd.append('marca', $('#marca').value.trim());
+          fd.append('instagram', $('#instagram').value.toLowerCase());
+
+          fd.append('tem_mei', document.querySelector('input[name=temMei]:checked')?.value||'NAO');
+          fd.append('cnpj', onlyDigits($('#cnpj').value));
+          fd.append('fantasia', $('#fantasia').value.trim());
+          fd.append('deseja_formalizar', document.querySelector('input[name=formalizar]:checked')?.value||'NAO');
+          fd.append('deseja_abrir_mei_agora', document.querySelector('input[name=abrirMei]:checked')?.value||'NAO');
+
+          fd.append('pertence_associacao', document.querySelector('input[name=associacao]:checked')?.value||'NAO');
+          fd.append('assoc_descricao', $('#assocDesc').value.trim());
+          fd.append('sobre_trabalho', $('#sobreTrabalho').value.trim());
+          fd.append('tempo_atividade', $('#tempoAtv').value);
+          fd.append('renda_media', $('#renda').value);
+          fd.append('divulgacao', $('#divulgacao').value);
+          fd.append('organizador', $('#organizador').value);
+          fd.append('como_soube', $('#comoSoube').value);
+
+          // Anexos
+          const f = id => document.getElementById(id).files[0];
+          [['docFrente','doc_frente'],['docVerso','doc_verso'],['compDomicilio','comp_domicilio'],['certMeiCnpj','cert_mei_cnpj'],['foto1','foto1'],['foto2','foto2'],['foto3','foto3'],['foto4','foto4']]
+            .forEach(([id,key])=>{ const file=f(id); if(file) fd.append(key, file, file.name); });
+
+          const res = await fetch(FINAL_ENDPOINT, { method: 'POST', body: fd });
+          const text = await res.text();
+          if(res.ok){
+            alert('Dados enviados com sucesso!');
+            document.getElementById('app').innerHTML = `<div class="py-5 text-center"><h3 class="mb-3">Inscrição recebida</h3><p class="text-muted">Você receberá atualizações pelos canais informados.</p></div>`;
+          }else{
+            $('#finalStatus').innerHTML = `<span class="badge text-bg-danger">Falha no envio</span>`; $('#finalOut').textContent=text; $('#finalOut').classList.remove('d-none');
+          }
+        }catch(e){ $('#finalStatus').innerHTML = `<span class="badge text-bg-danger">Erro de rede</span>`; $('#finalOut').textContent=String(e); $('#finalOut').classList.remove('d-none'); }
+      }
+      document.getElementById('btnSubmitAll').addEventListener('click', submitAll);
+
+      // Init --------------------------------------------------------------
+      function init(){
+        loadDraft();
+        toggleAssocDesc();
+        enforceRecife();
+        updateReview();
+        refreshSubmitState();
+        loadProducts();
+      }
+      init();
+    </script>
+  </body>
+</html>
