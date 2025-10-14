@@ -142,7 +142,7 @@
             </div>
             <div class="col-md-4">
               <label class="form-label" for="rg">Documento de Identidade</label>
-              <input type="text" class="form-control" id="rg">
+              <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="14" class="form-control" id="rg" placeholder="Somente números">
             </div>
             <div class="col-md-4">
               <label class="form-label required" for="genero">Identidade de gênero</label>
@@ -605,6 +605,29 @@
 
       // Masks/validations live
       $('#cpf').addEventListener('input', e=>{ e.target.value=onlyDigits(e.target.value).slice(0,11); const ok=isValidCPF(e.target.value); $('#cpfHelp').textContent = ok? '' : 'CPF inválido'; updateReview(); refreshSubmitState(); });
+      $('#cpf').addEventListener('keydown', e=>{
+        if(e.ctrlKey || e.metaKey || e.altKey) return;
+        const allowedKeys = ['Backspace','Tab','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Delete','Home','End'];
+        if(allowedKeys.includes(e.key)) return;
+        if(/^[0-9]$/.test(e.key)) return;
+        e.preventDefault();
+      });
+      $('#cpf').addEventListener('paste', e=>{
+        e.preventDefault();
+        const input = e.target;
+        const clip = (e.clipboardData || window.clipboardData);
+        const paste = onlyDigits((clip && clip.getData ? clip.getData('text') : '') || '').slice(0,11);
+        const start = input.selectionStart || 0;
+        const end = input.selectionEnd || 0;
+        const value = input.value;
+        const newValue = (value.slice(0, start) + paste + value.slice(end)).slice(0,11);
+        input.value = newValue;
+        const newPos = Math.min(start + paste.length, newValue.length);
+        requestAnimationFrame(()=>{
+          input.setSelectionRange(newPos, newPos);
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+      });
       $('#celular').addEventListener('input', e=>{
         const digits = onlyDigits(e.target.value).slice(0,11);
         e.target.value = digits;
@@ -631,6 +654,37 @@
         input.value = newValue;
         const newPos = Math.min(start + paste.length, newValue.length);
         requestAnimationFrame(()=>{ input.setSelectionRange(newPos, newPos); input.dispatchEvent(new Event('input', { bubbles: true })); });
+      });
+      $('#rg').addEventListener('input', e=>{
+        const digits = onlyDigits(e.target.value).slice(0,14);
+        if(e.target.value !== digits){
+          e.target.value = digits;
+        }
+        updateReview();
+        refreshSubmitState();
+      });
+      $('#rg').addEventListener('keydown', e=>{
+        if(e.ctrlKey || e.metaKey || e.altKey) return;
+        const allowedKeys = ['Backspace','Tab','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Delete','Home','End'];
+        if(allowedKeys.includes(e.key)) return;
+        if(/^[0-9]$/.test(e.key)) return;
+        e.preventDefault();
+      });
+      $('#rg').addEventListener('paste', e=>{
+        e.preventDefault();
+        const input = e.target;
+        const clip = (e.clipboardData || window.clipboardData);
+        const paste = onlyDigits((clip && clip.getData ? clip.getData('text') : '') || '').slice(0,14);
+        const start = input.selectionStart || 0;
+        const end = input.selectionEnd || 0;
+        const value = input.value;
+        const newValue = (value.slice(0, start) + paste + value.slice(end)).slice(0,14);
+        input.value = newValue;
+        const newPos = Math.min(start + paste.length, newValue.length);
+        requestAnimationFrame(()=>{
+          input.setSelectionRange(newPos, newPos);
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+        });
       });
       function sanitizeNumeroValue(value){
         const upper = String(value || '').toUpperCase();
@@ -698,6 +752,16 @@
       $('#email').addEventListener('blur', e=>{
         const value = e.target.value.trim();
         const ok = isValidEmail(value);
+        if(value && !ok){
+          alert('E-mail inválido. Verifique e tente novamente.');
+          e.target.value = '';
+          e.target.setCustomValidity('');
+          updateEmailHelp('', true);
+          updateReview();
+          refreshSubmitState();
+          setTimeout(()=>e.target.focus(), 0);
+          return;
+        }
         updateEmailHelp(value, ok);
       });
 
@@ -1001,7 +1065,7 @@
         const cidadeUf = [cid, uf].filter(Boolean).join('/');
         if(cidadeUf) enderecoPartes.push(cidadeUf);
         const enderecoResumo = enderecoPartes.join(' • ');
-        const tipoProdutoResumo = [tipoCadastro, prod].filter(Boolean).join(' / ');
+        const tipoProdutoResumo = [tipoCadastro, prod].filter(Boolean).join(' • ');
         $('#reviewBlock').innerHTML = `
           <h6>Resumo</h6>
           <table class="table table-sm review-table">
@@ -1012,7 +1076,7 @@
               <tr><td><strong>E-mail</strong></td><td>${email}</td></tr>
               <tr><td><strong>Celular</strong></td><td>${tel}</td></tr>
               <tr><td><strong>Endereço</strong></td><td>${enderecoResumo}</td></tr>
-              <tr><td><strong>Tipo de cadastro / Produto</strong></td><td>${tipoProdutoResumo}</td></tr>
+              <tr><td><strong>Tipo de cadastro • Produto</strong></td><td>${tipoProdutoResumo}</td></tr>
               <tr><td><strong>Gênero</strong></td><td>${genero}</td></tr>
             </tbody>
           </table>`;
