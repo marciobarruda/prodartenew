@@ -92,11 +92,11 @@
               <label class="form-label required d-block">Selecione o tipo de inscrição</label>
               <div class="d-flex gap-3">
                 <div class="form-check">
-                  <input class="form-check-input" type="radio" name="tipoInscricao" id="inscNova" value="NOVA" checked>
+                  <input class="form-check-input" type="radio" name="tipoInscricao" id="inscNova" value="NOVA INSCRIÇÃO" checked>
                   <label class="form-check-label" for="inscNova">Nova inscrição</label>
                 </div>
                 <div class="form-check">
-                  <input class="form-check-input" type="radio" name="tipoInscricao" id="inscRec" value="RECAD">
+                  <input class="form-check-input" type="radio" name="tipoInscricao" id="inscRec" value="RECADASTRAMENTO">
                   <label class="form-check-label" for="inscRec">Recadastramento</label>
                 </div>
               </div>
@@ -125,8 +125,8 @@
               <label class="form-label required" for="segmento">Segmento</label>
               <select id="segmento" class="form-select">
                 <option value="" selected>Selecione...</option>
-                <option value="artesanato">Artesanato</option>
-                <option value="gastronomia">Gastronomia</option>
+                <option value="ARTESAO">Artesanato</option>
+                <option value="GASTRONOMIA">Gastronomia</option>
               </select>
             </div>
             <div class="col-md-6">
@@ -164,25 +164,41 @@
               <label class="form-label" for="nomeSocial">Nome Social (opcional)</label>
               <input type="text" class="form-control" id="nomeSocial">
             </div>
-            <div class="col-md-4">
+          </div>
+          <div class="row g-3 mt-0">
+            <div class="col-md-6">
               <label class="form-label" for="rg">Documento de Identidade</label>
               <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="14" class="form-control" id="rg" placeholder="Somente números">
             </div>
+            <div class="col-md-6">
+              <label class="form-label required" for="nascimento">Data de nascimento</label>
+              <input type="date" class="form-control" id="nascimento" required>
+            </div>
+          </div>
+          <div class="row g-3 mt-0">
+            <div class="col-md-6">
+              <label class="form-label required" for="mae">Nome da mãe</label>
+              <input type="text" class="form-control" id="mae" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="pai">Nome do pai</label>
+              <input type="text" class="form-control" id="pai">
+            </div>
+          </div>
+          <div class="row g-3 mt-0">
             <div class="col-md-4">
-              <label class="form-label required" for="genero">Identidade de gênero</label>
-              <select id="genero" class="form-select" required disabled>
-                <option value="" selected>Carregando opções...</option>
+              <label class="form-label required" for="genero">Gênero</label>
+              <select id="genero" class="form-select" required>
+                <option value="" selected>Selecione...</option>
+                <option value="FEMININO">Feminino</option>
+                <option value="MASCULINO">Masculino</option>
+                <option value="NAO_INFORMAR">Prefiro não informar</option>
               </select>
             </div>
-            <div class="col-md-4 d-none" id="generoOutroWrap">
-              <label class="form-label required" for="generoOutro">Informe a identidade de gênero</label>
-              <select id="generoOutro" class="form-select">
-                <option value="" selected>Selecione...</option>
-                <option>Agênero</option>
-                <option>Gênero fluido</option>
-                <option>Transfeminino</option>
-                <option>Transmasculino</option>
-                <option>Outro (especificar na descrição)</option>
+            <div class="col-md-4">
+              <label class="form-label required" for="identidadeGenero">Informe a identidade de gênero</label>
+              <select id="identidadeGenero" class="form-select" required disabled>
+                <option value="" selected>Carregando opções...</option>
               </select>
             </div>
             <div class="col-md-4">
@@ -196,24 +212,14 @@
                 <option value="INDIGENA">Indígena</option>
               </select>
             </div>
+          </div>
+          <div class="row g-3 mt-0">
             <div class="col-md-6">
-              <label class="form-label required" for="mae">Nome da mãe</label>
-              <input type="text" class="form-control" id="mae" required>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label" for="pai">Nome do pai</label>
-              <input type="text" class="form-control" id="pai">
-            </div>
-            <div class="col-md-3">
-              <label class="form-label required" for="nascimento">Data de Nascimento</label>
-              <input type="date" class="form-control" id="nascimento" required>
-            </div>
-            <div class="col-md-5">
               <label class="form-label required" for="email">E-mail</label>
               <input type="email" class="form-control" id="email" placeholder="nome@exemplo.com" required>
               <div class="help" id="emailHelp"></div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-6">
               <label class="form-label required" for="celular">Celular</label>
               <input type="text" inputmode="numeric" pattern="\\d*" maxlength="11" class="form-control" id="celular" placeholder="DDD + número (apenas dígitos)" required>
               <div class="help" id="celHelp"></div>
@@ -377,7 +383,7 @@
               </div>
             </div>
             <div class="col-12">
-              <label class="form-label required">Comprovante de Domicílio</label>
+              <label class="form-label required">Comprovante de residência</label>
               <div class="dropzone">
                 <input class="form-control" type="file" id="compDomicilio" accept="image/*,application/pdf" capture="environment">
               </div>
@@ -478,10 +484,10 @@
               <label class="form-label required" for="divulgacao">Como ficou sabendo do PRODARTE</label>
               <select id="divulgacao" class="form-select" required>
                 <option value="" selected>Selecione...</option>
-                <option value="REDE_SOCIAL">Redes sociais</option>
-                <option value="SITE_PCR">Site da prefeitura/Conecta Recife</option>
-                <option value="EVENTO_ORG">Evento/Organização</option>
-                <option value="INDICACAO">Indicação</option>
+                <option value="Redes sociais">Redes sociais</option>
+                <option value="Site da prefeitura-Conecta Recife">Site da prefeitura/Conecta Recife</option>
+                <option value="Evento-Organização">Evento/Organização</option>
+                <option value="Indicação">Indicação</option>
                 <option value="OUTRO">Outro</option>
               </select>
             </div>
@@ -601,26 +607,27 @@
         .trim()
         .toLowerCase();
 
-      async function loadGeneros(prefillValue){
-        const select = document.getElementById('genero');
+      async function loadIdentidadesGenero(prefillValue){
+        const select = document.getElementById('identidadeGenero');
         if(!select) return;
-        const previousValue = prefillValue !== undefined ? prefillValue : select.value;
+        const previousValue = prefillValue ?? select.value;
         select.disabled = true;
         select.innerHTML = '';
         select.add(new Option('Carregando...', ''));
 
-        const fallbackOptions = () => {
+        const preencher = (opcoes) => {
+          const unique = Array.from(new Set(opcoes.map(opt => opt.trim()).filter(Boolean)));
           select.innerHTML = '';
-          ['Selecione...', 'Feminino', 'Masculino', 'Não-binário', 'Prefiro não informar', 'Outro'].forEach((label, index) => {
-            const value = index === 0 ? '' : (label === 'Outro' ? 'OUTRO' : label);
-            const option = new Option(label, value);
-            if(index === 0) option.selected = true;
-            select.add(option);
-          });
-          select.disabled = false;
+          select.add(new Option('Selecione...', ''));
+          unique
+            .sort((a,b)=>a.localeCompare(b,'pt-BR',{ sensitivity:'base' }))
+            .forEach(label => select.add(new Option(label, label)));
           if(previousValue && [...select.options].some(opt => opt.value === previousValue)){
             select.value = previousValue;
+          }else{
+            select.value = '';
           }
+          select.disabled = false;
           select.dispatchEvent(new Event('change', { bubbles: true }));
         };
 
@@ -628,64 +635,27 @@
           const res = await fetch(GENERO_ENDPOINT, { method: 'GET', cache: 'no-store' });
           if(!res.ok) throw new Error(`HTTP ${res.status}`);
           const data = await res.json();
-          const list = Array.isArray(data) ? data : (data?.items || data?.dados || data?.data || data?.result || []);
-          const entries = [];
-          const seen = new Set();
-          const pick = (obj, keys) => {
-            for(const key of keys){
-              if(obj && obj[key] !== undefined && obj[key] !== null){
-                const value = String(obj[key]).trim();
-                if(value) return value;
-              }
+          const lista = Array.isArray(data) ? data : (data?.items || data?.dados || data?.data || data?.result || []);
+          const valores = lista.map(item => {
+            if(typeof item === 'string') return item;
+            if(item && typeof item === 'object'){
+              return String(item.identidade || item.nome || item.label || '').trim();
             }
             return '';
-          };
-
-          list.forEach(item => {
-            if(item === null || item === undefined) return;
-            if(typeof item === 'string'){
-              const label = item.trim();
-              if(!label) return;
-              const key = label.toLowerCase();
-              if(seen.has(key)) return;
-              seen.add(key);
-              entries.push({ value: label, label });
-              return;
-            }
-            if(typeof item === 'object'){
-              const label = pick(item, ['label','nome','descricao','descricaoCurta','descricao_curta','description','texto','text']);
-              const rawValue = pick(item, ['valor','value','id','codigo','sigla','slug','nome','label']);
-              const finalLabel = label || rawValue;
-              const finalValue = rawValue || label;
-              if(!finalLabel) return;
-              const key = (finalValue || finalLabel).toLowerCase();
-              if(seen.has(key)) return;
-              seen.add(key);
-              entries.push({ value: finalValue || finalLabel, label: finalLabel });
-            }
           });
-
-          select.innerHTML = '';
-          select.add(new Option('Selecione...', ''));
-          entries
-            .sort((a,b)=>a.label.localeCompare(b.label,'pt-BR',{ sensitivity:'base' }))
-            .forEach(item => select.add(new Option(item.label, item.value)));
-
-          if(!entries.some(item => String(item.value).toUpperCase() === 'OUTRO')){
-            select.add(new Option('Outro', 'OUTRO'));
+          if(valores.some(Boolean)){
+            preencher(valores);
+            return;
           }
-
-          if(previousValue && [...select.options].some(opt => opt.value === previousValue)){
-            select.value = previousValue;
-          }else{
-            select.value = '';
-          }
-
-          select.disabled = false;
-          select.dispatchEvent(new Event('change', { bubbles: true }));
+          throw new Error('Lista vazia');
         }catch(err){
           console.warn('Falha ao carregar identidades de gênero:', err);
-          fallbackOptions();
+          const fallback = [
+            'Agênero','Andrógino','Apogênero','Autigênero','Bigênero','Cisgênero','Condigênero','Demiboy','Demigirl','Demigênero',
+            'Genderflux','Girlflux','Gênero fluido','Intergênero','Libragênero','Maverique','Neutrois','Novigênero','Não-binárie',
+            'Pangênero','Poligênero','Queer','Transexual','Transgênero','Travesti','Virflux','Xenogênero'
+          ];
+          preencher(fallback);
         }
       }
 
@@ -1133,14 +1103,6 @@
         updateReview(); refreshSubmitState();
       });
 
-      // Gênero Outro toggle
-      $('#genero').addEventListener('change', (e)=>{
-        const outro = e.target.value === 'OUTRO';
-        $('#generoOutroWrap').classList.toggle('d-none', !outro);
-        $('#generoOutro').required = outro;
-        refreshSubmitState();
-      });
-
       // Carteira Artesão toggle
       document.querySelectorAll('input[name="carteiraArt"]').forEach(r=>{
         r.addEventListener('change', ()=>{
@@ -1245,7 +1207,7 @@
       // Divulgação toggles
       $('#divulgacao').addEventListener('change', e=>{
         const v=e.target.value;
-        const org = v==='EVENTO_ORG';
+        const org = v==='Evento-Organização';
         const outro = v==='OUTRO';
         $('#orgWrap').classList.toggle('d-none', !org);
         $('#organizador').required = org;
@@ -1266,7 +1228,10 @@
         const tipoCadastro = esc(tipoOption ? tipoOption.textContent : tipoSel?.value || '');
         const segmentoSelect = document.getElementById('segmento');
         const segmentoLabel = segmentoSelect && segmentoSelect.value ? esc(segmentoSelect.selectedOptions[0]?.textContent || '') : '';
-        const genero = esc($('#genero').value==='OUTRO' ? $('#generoOutro').value : $('#genero').value);
+        const generoSelect = document.getElementById('genero');
+        const genero = generoSelect && generoSelect.value ? esc(generoSelect.selectedOptions[0]?.textContent || '') : '';
+        const identidadeSelect = document.getElementById('identidadeGenero');
+        const identidadeGenero = identidadeSelect && identidadeSelect.value ? esc(identidadeSelect.selectedOptions[0]?.textContent || '') : '';
         const racaSelect = document.getElementById('raca');
         const raca = racaSelect && racaSelect.value ? esc(racaSelect.selectedOptions[0]?.textContent || '') : '';
         const nascimentoFmt = fmtDateBR($('#nascimento').value);
@@ -1291,6 +1256,7 @@
               <tr><td><strong>Endereço</strong></td><td>${enderecoResumo}</td></tr>
               <tr><td><strong>Tipo de cadastro • Produto</strong></td><td>${tipoProdutoResumo}</td></tr>
               <tr><td><strong>Gênero</strong></td><td>${genero}</td></tr>
+              <tr><td><strong>Identidade de gênero</strong></td><td>${identidadeGenero}</td></tr>
               <tr><td><strong>Cor (IBGE)</strong></td><td>${raca}</td></tr>
             </tbody>
           </table>`;
@@ -1425,7 +1391,7 @@
       // Submit state ------------------------------------------------------
       function refreshSubmitState(){
         const requiredSelectors = [
-          '#tipoCadastro','#segmento','#produto','#cpf','#nome','#genero','#raca','#mae','#nascimento',
+          '#tipoCadastro','#segmento','#produto','#cpf','#nome','#genero','#identidadeGenero','#raca','#mae','#nascimento',
           '#email','#celular','#cep','#logradouro','#numero','#bairro','#cidade','#uf',
           '#sobreTrabalho','#tempoAtv','#renda','#divulgacao','#docFrente','#docVerso','#compDomicilio','#foto1','#foto2'
         ];
@@ -1484,10 +1450,8 @@
         // campos condicionais
         const produtoOutroOk = ($('#produto').value!=='OUTROS') || (!!$('#produtoOutro').value.trim());
         setFieldInvalid($('#produtoOutro'), !produtoOutroOk && !$('#produtoOutroWrap').classList.contains('d-none'));
-        const generoOutroOk = ($('#genero').value!=='OUTRO') || (!!$('#generoOutro').value);
-        setFieldInvalid($('#generoOutro'), !generoOutroOk && $('#genero').value==='OUTRO');
-        const divulgOrgOk = ($('#divulgacao').value!=='EVENTO_ORG') || (!!$('#organizador').value);
-        setFieldInvalid($('#organizador'), !divulgOrgOk && $('#divulgacao').value==='EVENTO_ORG');
+        const divulgOrgOk = ($('#divulgacao').value!=='Evento-Organização') || (!!$('#organizador').value);
+        setFieldInvalid($('#organizador'), !divulgOrgOk && $('#divulgacao').value==='Evento-Organização');
         const divulgOutroOk = ($('#divulgacao').value!=='OUTRO') || (!!($('#comoSoube').value||'').trim());
         setFieldInvalid($('#comoSoube'), !divulgOutroOk && $('#divulgacao').value==='OUTRO');
         const assocSim = document.getElementById('assocSim').checked;
@@ -1506,7 +1470,7 @@
           setFieldInvalid(racialCheckbox, !racialOk);
         }
 
-        const allOk = requiredFilled && cpfOk && celOk && emailOk && nascimentoOk && cnpjOk && certReqOk && produtoOutroOk && generoOutroOk && divulgOrgOk && divulgOutroOk && assocDescOk && cityOk && termoOk && racialOk;
+        const allOk = requiredFilled && cpfOk && celOk && emailOk && nascimentoOk && cnpjOk && certReqOk && produtoOutroOk && divulgOrgOk && divulgOutroOk && assocDescOk && cityOk && termoOk && racialOk;
         const btn=$('#btnSubmitAll');
         btn.disabled = !allOk; btn.classList.toggle('btn-success', allOk); btn.classList.toggle('btn-secondary', !allOk);
       }
@@ -1514,7 +1478,7 @@
       // Files/inputs listeners for submit state + review
       const allWatch = ['change','input','blur'];
       const selectors = [
-        '#tipoCadastro','#segmento','#produto','#produtoOutro','#genero','#generoOutro','#raca','#cpf','#nome','#nomeSocial','#rg',
+        '#tipoCadastro','#segmento','#produto','#produtoOutro','#genero','#identidadeGenero','#raca','#cpf','#nome','#nomeSocial','#rg',
         '#mae','#pai','#nascimento','#email','#celular','#cep','#logradouro','#numero','#bairro','#cidade','#uf',
         '#carteiraSim','#carteiraNao','#numCarteira','#instagram','#marca','#meiSim','#meiNao','#cnpj','#fantasia',
         '#formSim','#formNao','#abrirMeiSim','#abrirMeiNao','#divulgacao','#organizador','#comoSoube',
@@ -1560,7 +1524,14 @@
           fd.append('nome', $('#nome').value.trim());
           fd.append('nome_social', $('#nomeSocial').value.trim());
           fd.append('rg', $('#rg').value.trim());
-          fd.append('genero', $('#genero').value==='OUTRO' ? $('#generoOutro').value : $('#genero').value);
+          const generoSelect = document.getElementById('genero');
+          const generoOption = generoSelect ? generoSelect.selectedOptions[0] : null;
+          fd.append('genero', generoSelect ? generoSelect.value : '');
+          fd.append('genero_label', generoOption ? generoOption.textContent.trim() : '');
+          const identidadeSelect = document.getElementById('identidadeGenero');
+          const identidadeOption = identidadeSelect ? identidadeSelect.selectedOptions[0] : null;
+          fd.append('identidade_genero', identidadeSelect && !identidadeSelect.disabled ? identidadeSelect.value : '');
+          fd.append('identidade_genero_label', identidadeOption ? identidadeOption.textContent.trim() : '');
           const racaSelect = document.getElementById('raca');
           const racaOption = racaSelect ? racaSelect.selectedOptions[0] : null;
           fd.append('autodeclaracao_cor', racaSelect ? racaSelect.value : '');
@@ -1628,8 +1599,8 @@
         updateSegmentoVisibility();
         resetDeclaration(racialDeclarationBox, racialCheckbox, racialHint);
         resetDeclaration(responsibilityBox, responsibilityCheckbox, responsibilityHint);
-        const generoStored = $('#genero')?.value || '';
-        loadGeneros(generoStored);
+        const identidadeStored = $('#identidadeGenero')?.value || '';
+        loadIdentidadesGenero(identidadeStored);
         const emailValue = ($('#email')?.value || '').trim();
         updateEmailHelp(emailValue, isValidEmail(emailValue));
         const numeroEl = $('#numero');
