@@ -1501,84 +1501,125 @@
       $('#quickSave').addEventListener('click', ()=>{ saveDraft(); const btn=$('#quickSave'); const old=btn.textContent; btn.textContent='Rascunho salvo'; setTimeout(()=>btn.textContent=old, 1500); });
 
       // Envio -------------------------------------------------------------
+      async function fileToBase64(file){
+        return new Promise((resolve, reject)=>{
+          const reader = new FileReader();
+          reader.onload = () => {
+            const result = reader.result || '';
+            const base64 = typeof result === 'string' ? result.split(',').pop() || '' : '';
+            resolve(base64);
+          };
+          reader.onerror = () => reject(reader.error || new Error('Falha ao ler arquivo'));
+          reader.readAsDataURL(file);
+        });
+      }
+
+      async function buildAttachments(){
+        const configs = [
+          { id: 'docFrente', field: 'doc_frente' },
+          { id: 'docVerso', field: 'doc_verso' },
+          { id: 'compDomicilio', field: 'comp_domicilio' },
+          { id: 'certMeiCnpj', field: 'cert_mei_cnpj' },
+          { id: 'foto1', field: 'foto1' },
+          { id: 'foto2', field: 'foto2' },
+          { id: 'foto3', field: 'foto3' },
+          { id: 'foto4', field: 'foto4' }
+        ];
+        const anexos = [];
+        for (const cfg of configs){
+          const input = document.getElementById(cfg.id);
+          if(!input || !(input.files||[]).length) continue;
+          const file = input.files[0];
+          const base64 = await fileToBase64(file);
+          const name = file.name || '';
+          const extension = name.includes('.') ? name.split('.').pop() : '';
+          anexos.push({
+            campo: cfg.field,
+            fileName: name,
+            fileExtension: extension ? extension.toLowerCase() : '',
+            base64
+          });
+        }
+        return anexos;
+      }
+
       async function submitAll(){
         try{
           $('#finalStatus').innerHTML = `<span class="badge text-bg-secondary">Enviando...</span>`;
-          const fd = new FormData();
-          // Básicos
-          fd.append('tipo_inscricao', document.querySelector('input[name=tipoInscricao]:checked').value);
           const tipoSelect = document.getElementById('tipoCadastro');
           const tipoOption = tipoSelect ? tipoSelect.selectedOptions[0] : null;
-          fd.append('tipo_cadastro', $('#tipoCadastro').value);
-          fd.append('tipo_cadastro_label', tipoOption ? tipoOption.textContent.trim() : '');
-          fd.append('tipo_cadastro_produtos_id', tipoOption ? (tipoOption.dataset?.productsId || '') : '');
           const segmentoSelect = document.getElementById('segmento');
           const segmentoOption = segmentoSelect ? segmentoSelect.selectedOptions[0] : null;
-          fd.append('segmento', segmentoSelect && !segmentoSelect.disabled ? segmentoSelect.value : '');
-          fd.append('segmento_label', segmentoOption ? segmentoOption.textContent.trim() : '');
-          const produtoFinal = $('#produto').value==='OUTROS' ? $('#produtoOutro').value : $('#produto').value;
-          fd.append('produto', produtoFinal);
-          fd.append('produto_outro', $('#produtoOutro').value.trim());
-
-          fd.append('cpf', onlyDigits($('#cpf').value));
-          fd.append('nome', $('#nome').value.trim());
-          fd.append('nome_social', $('#nomeSocial').value.trim());
-          fd.append('rg', $('#rg').value.trim());
           const generoSelect = document.getElementById('genero');
           const generoOption = generoSelect ? generoSelect.selectedOptions[0] : null;
-          fd.append('genero', generoSelect ? generoSelect.value : '');
-          fd.append('genero_label', generoOption ? generoOption.textContent.trim() : '');
           const identidadeSelect = document.getElementById('identidadeGenero');
           const identidadeOption = identidadeSelect ? identidadeSelect.selectedOptions[0] : null;
-          fd.append('identidade_genero', identidadeSelect && !identidadeSelect.disabled ? identidadeSelect.value : '');
-          fd.append('identidade_genero_label', identidadeOption ? identidadeOption.textContent.trim() : '');
           const racaSelect = document.getElementById('raca');
           const racaOption = racaSelect ? racaSelect.selectedOptions[0] : null;
-          fd.append('autodeclaracao_cor', racaSelect ? racaSelect.value : '');
-          fd.append('autodeclaracao_cor_label', racaOption ? racaOption.textContent.trim() : '');
-          fd.append('mae', $('#mae').value.trim());
-          fd.append('pai', $('#pai').value.trim());
-          fd.append('nascimento', $('#nascimento').value);
-          fd.append('email', $('#email').value.toLowerCase());
-          fd.append('celular', onlyDigits($('#celular').value));
+          const produtoFinal = $('#produto').value==='OUTROS' ? $('#produtoOutro').value : $('#produto').value;
 
-          fd.append('cep', onlyDigits($('#cep').value));
-          fd.append('logradouro', $('#logradouro').value.trim());
-          fd.append('numero', $('#numero').value.trim());
-          fd.append('complemento', $('#complemento').value.trim());
-          fd.append('bairro', $('#bairro').value.trim());
-          fd.append('cidade', $('#cidade').value.trim());
-          fd.append('uf', $('#uf').value.trim().toUpperCase());
+          const payload = {
+            tipo_inscricao: document.querySelector('input[name=tipoInscricao]:checked').value,
+            tipo_cadastro: $('#tipoCadastro').value,
+            tipo_cadastro_label: tipoOption ? tipoOption.textContent.trim() : '',
+            tipo_cadastro_produtos_id: tipoOption ? (tipoOption.dataset?.productsId || '') : '',
+            segmento: segmentoSelect && !segmentoSelect.disabled ? segmentoSelect.value : '',
+            segmento_label: segmentoOption ? segmentoOption.textContent.trim() : '',
+            produto: produtoFinal,
+            produto_outro: $('#produtoOutro').value.trim(),
+            cpf: onlyDigits($('#cpf').value),
+            nome: $('#nome').value.trim(),
+            nome_social: $('#nomeSocial').value.trim(),
+            rg: $('#rg').value.trim(),
+            genero: generoSelect ? generoSelect.value : '',
+            genero_label: generoOption ? generoOption.textContent.trim() : '',
+            identidade_genero: identidadeSelect && !identidadeSelect.disabled ? identidadeSelect.value : '',
+            identidade_genero_label: identidadeOption ? identidadeOption.textContent.trim() : '',
+            autodeclaracao_cor: racaSelect ? racaSelect.value : '',
+            autodeclaracao_cor_label: racaOption ? racaOption.textContent.trim() : '',
+            mae: $('#mae').value.trim(),
+            pai: $('#pai').value.trim(),
+            nascimento: $('#nascimento').value,
+            email: $('#email').value.toLowerCase(),
+            celular: onlyDigits($('#celular').value),
+            cep: onlyDigits($('#cep').value),
+            logradouro: $('#logradouro').value.trim(),
+            numero: $('#numero').value.trim(),
+            complemento: $('#complemento').value.trim(),
+            bairro: $('#bairro').value.trim(),
+            cidade: $('#cidade').value.trim(),
+            uf: $('#uf').value.trim().toUpperCase(),
+            carteira_artesao: document.querySelector('input[name=carteiraArt]:checked')?.value||'NAO',
+            num_carteira: $('#numCarteira').value.trim(),
+            marca: $('#marca').value.trim(),
+            instagram: $('#instagram').value.toLowerCase(),
+            tem_mei: document.querySelector('input[name=temMei]:checked')?.value||'NAO',
+            cnpj: onlyDigits($('#cnpj').value),
+            fantasia: $('#fantasia').value.trim(),
+            deseja_formalizar: document.querySelector('input[name=formalizar]:checked')?.value||'NAO',
+            deseja_abrir_mei_agora: document.querySelector('input[name=abrirMei]:checked')?.value||'NAO',
+            pertence_associacao: document.querySelector('input[name=associacao]:checked')?.value||'NAO',
+            assoc_descricao: $('#assocDesc').value.trim(),
+            sobre_trabalho: $('#sobreTrabalho').value.trim(),
+            tempo_atividade: $('#tempoAtv').value,
+            renda_media: $('#renda').value,
+            divulgacao: $('#divulgacao').value,
+            organizador: $('#organizador').value,
+            como_soube: $('#comoSoube').value,
+            termo_responsabilidade: document.getElementById('termoResponsabilidade')?.checked ? 'ACEITO' : 'NAO',
+            autodeclaracao_racial: racialCheckbox && racialCheckbox.checked ? 'ACEITO' : 'NAO',
+            autodeclaracao_racial_texto: (racialDeclarationBox?.innerText || '').trim()
+          };
 
-          fd.append('carteira_artesao', document.querySelector('input[name=carteiraArt]:checked')?.value||'NAO');
-          fd.append('num_carteira', $('#numCarteira').value.trim());
-          fd.append('marca', $('#marca').value.trim());
-          fd.append('instagram', $('#instagram').value.toLowerCase());
+          payload.anexos = await buildAttachments();
 
-          fd.append('tem_mei', document.querySelector('input[name=temMei]:checked')?.value||'NAO');
-          fd.append('cnpj', onlyDigits($('#cnpj').value));
-          fd.append('fantasia', $('#fantasia').value.trim());
-          fd.append('deseja_formalizar', document.querySelector('input[name=formalizar]:checked')?.value||'NAO');
-          fd.append('deseja_abrir_mei_agora', document.querySelector('input[name=abrirMei]:checked')?.value||'NAO');
-
-          fd.append('pertence_associacao', document.querySelector('input[name=associacao]:checked')?.value||'NAO');
-          fd.append('assoc_descricao', $('#assocDesc').value.trim());
-          fd.append('sobre_trabalho', $('#sobreTrabalho').value.trim());
-          fd.append('tempo_atividade', $('#tempoAtv').value);
-          fd.append('renda_media', $('#renda').value);
-          fd.append('divulgacao', $('#divulgacao').value);
-          fd.append('organizador', $('#organizador').value);
-          fd.append('como_soube', $('#comoSoube').value);
-          fd.append('termo_responsabilidade', document.getElementById('termoResponsabilidade')?.checked ? 'ACEITO' : 'NAO');
-          fd.append('autodeclaracao_racial', racialCheckbox && racialCheckbox.checked ? 'ACEITO' : 'NAO');
-          fd.append('autodeclaracao_racial_texto', (racialDeclarationBox?.innerText || '').trim());
-
-          // Anexos
-          const f = id => document.getElementById(id).files[0];
-          [['docFrente','doc_frente'],['docVerso','doc_verso'],['compDomicilio','comp_domicilio'],['certMeiCnpj','cert_mei_cnpj'],['foto1','foto1'],['foto2','foto2'],['foto3','foto3'],['foto4','foto4']]
-            .forEach(([id,key])=>{ const file=f(id); if(file) fd.append(key, file, file.name); });
-
-          const res = await fetch(FINAL_ENDPOINT, { method: 'POST', body: fd });
+          const res = await fetch(FINAL_ENDPOINT, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+          });
           const text = await res.text();
           if(res.ok){
             alert('Dados enviados com sucesso!');
