@@ -75,7 +75,26 @@
         margin:-90px auto -90px !important;
       }
       .subtle{ color:#6c757d; font-weight:500; letter-spacing:.2px; }
-      .floating-save{ position:fixed; right:1rem; bottom:1rem; z-index:50; }
+      .message-overlay{
+        position:fixed;
+        inset:0;
+        background:rgba(11,36,71,.55);
+        display:none;
+        align-items:center;
+        justify-content:center;
+        padding:1.5rem;
+        z-index:1080;
+      }
+      .message-overlay.show{ display:flex; }
+      .message-dialog{
+        background:#ffffff;
+        border-radius:.85rem;
+        box-shadow:0 20px 45px rgba(13,110,253,.18), 0 10px 25px rgba(11,36,71,.25);
+        max-width:420px;
+        width:100%;
+        padding:1.75rem 1.5rem;
+      }
+      .message-dialog h5{ font-weight:700; color:#0b2447; }
       @media (max-width: 992px){
         :root{ --stage-w:100vw; --pattern-w:100vw; }
         .stage, .pattern-strip{ left:0; }
@@ -572,8 +591,6 @@
 
     <div class="pattern-strip pattern-bottom"></div>
 
-    <button class="btn btn-primary rounded-pill shadow floating-save" id="quickSave" type="button">Salvar rascunho</button>
-
     <div class="modal fade" id="messageModal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -591,6 +608,16 @@
       </div>
     </div>
 
+    <div class="message-overlay" id="messageFallback" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="message-dialog">
+        <h5 class="mb-3">Mensagem</h5>
+        <p class="mb-4" id="messageFallbackBody"></p>
+        <div class="text-end">
+          <button type="button" class="btn btn-primary" id="messageFallbackClose">OK</button>
+        </div>
+      </div>
+    </div>
+
     <script>
       const FINAL_ENDPOINT = "https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/cadastro-prodarte";
       const PRODUCTS_ENDPOINT = "https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/prodarte-produtos";
@@ -598,20 +625,51 @@
       const messageModalEl = document.getElementById('messageModal');
       const messageModalBody = document.getElementById('messageModalBody');
       const messageModal = (window.bootstrap && messageModalEl) ? new window.bootstrap.Modal(messageModalEl) : null;
+      const fallbackOverlay = document.getElementById('messageFallback');
+      const fallbackBody = document.getElementById('messageFallbackBody');
+      const fallbackClose = document.getElementById('messageFallbackClose');
 
       function showMessage(text){
-        if(!messageModal || !messageModalBody){
-          alert(text);
-          return Promise.resolve();
+        if(messageModal && messageModalBody){
+          messageModalBody.textContent = text;
+          return new Promise(resolve => {
+            messageModalEl.addEventListener('hidden.bs.modal', function handler(){
+              messageModalEl.removeEventListener('hidden.bs.modal', handler);
+              resolve();
+            }, { once: true });
+            messageModal.show();
+          });
         }
-        messageModalBody.textContent = text;
-        return new Promise(resolve => {
-          messageModalEl.addEventListener('hidden.bs.modal', function handler(){
-            messageModalEl.removeEventListener('hidden.bs.modal', handler);
-            resolve();
-          }, { once: true });
-          messageModal.show();
-        });
+        if(fallbackOverlay && fallbackBody && fallbackClose){
+          fallbackBody.textContent = text;
+          fallbackOverlay.classList.add('show');
+          fallbackOverlay.setAttribute('aria-hidden','false');
+          try{ fallbackClose.focus({ preventScroll: true }); }
+          catch(e){ fallbackClose.focus(); }
+          return new Promise(resolve => {
+            const close = () => {
+              fallbackOverlay.classList.remove('show');
+              fallbackOverlay.setAttribute('aria-hidden','true');
+              fallbackClose.removeEventListener('click', close);
+              fallbackOverlay.removeEventListener('click', overlayHandler);
+              document.removeEventListener('keydown', escHandler);
+              resolve();
+            };
+            const overlayHandler = (event) => {
+              if(event.target === fallbackOverlay){
+                close();
+              }
+            };
+            const escHandler = (event) => {
+              if(event.key === 'Escape'){ event.preventDefault(); close(); }
+            };
+            fallbackClose.addEventListener('click', close, { once: true });
+            fallbackOverlay.addEventListener('click', overlayHandler);
+            document.addEventListener('keydown', escHandler, { once: true });
+          });
+        }
+        console.warn('Nenhum componente de mensagem disponível.');
+        return Promise.resolve();
       }
 
       // Utils -------------------------------------------------------------
@@ -1483,13 +1541,6 @@
         });
       }
 
-      // Rascunho local ----------------------------------------------------
-      const fieldsForDraft = selectors.filter(s=>!['#docFrente','#docVerso','#compDomicilio','#certMeiCnpj','#foto1','#foto2','#foto3','#foto4'].includes(s));
-      const DRAFT_KEY = 'prodarte_draft_v1';
-      function saveDraft(){ const data={}; fieldsForDraft.forEach(sel=>{ const el=$(sel); if(!el) return; data[sel]=el.value || (el.checked??undefined); }); localStorage.setItem(DRAFT_KEY, JSON.stringify(data)); }
-      function loadDraft(){ try{ const data=JSON.parse(localStorage.getItem(DRAFT_KEY)||'{}'); Object.entries(data).forEach(([sel,val])=>{ const el=$(sel); if(!el) return; if(typeof val==='boolean'){ el.checked=val; } else { el.value=val; } }); }catch(e){} }
-      $('#quickSave').addEventListener('click', ()=>{ saveDraft(); const btn=$('#quickSave'); const old=btn.textContent; btn.textContent='Rascunho salvo'; setTimeout(()=>btn.textContent=old, 1500); });
-
       // Envio -------------------------------------------------------------
       async function fileToBase64(file){
         return new Promise((resolve, reject)=>{
@@ -1620,7 +1671,6 @@
       // Init --------------------------------------------------------------
       function init(){
         disableAutocomplete();
-        loadDraft();
         toggleAssocDesc();
         enforceRecife();
         updateSegmentoVisibility();
