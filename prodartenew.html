@@ -567,10 +567,46 @@
 
     <button class="btn btn-primary rounded-pill shadow floating-save" id="quickSave" type="button">Salvar rascunho</button>
 
+    <div class="modal fade" id="messageModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Mensagem</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+          </div>
+          <div class="modal-body">
+            <p class="mb-0" id="messageModalBody"></p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script>
       const FINAL_ENDPOINT = "https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/cadastro-prodarte";
       const PRODUCTS_ENDPOINT = "https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/prodarte-produtos";
       const GENERO_ENDPOINT = "https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/id-genero";
+
+      const messageModalEl = document.getElementById('messageModal');
+      const messageModalBody = document.getElementById('messageModalBody');
+      const messageModal = (window.bootstrap && messageModalEl) ? new window.bootstrap.Modal(messageModalEl) : null;
+
+      function showMessage(text){
+        if(!messageModal || !messageModalBody){
+          alert(text);
+          return Promise.resolve();
+        }
+        messageModalBody.textContent = text;
+        return new Promise(resolve => {
+          messageModalEl.addEventListener('hidden.bs.modal', function handler(){
+            messageModalEl.removeEventListener('hidden.bs.modal', handler);
+            resolve();
+          }, { once: true });
+          messageModal.show();
+        });
+      }
 
       // Utils -------------------------------------------------------------
       const $ = (sel) => document.querySelector(sel);
@@ -871,23 +907,23 @@
         updateEmailHelp(value, ok);
         updateReview(); refreshSubmitState();
       });
-      $('#email').addEventListener('blur', e=>{
+      $('#email').addEventListener('blur', async e=>{
         const value = e.target.value.trim();
         const ok = isValidEmail(value);
         if(value && !ok){
-          alert('E-mail inválido. Verifique e tente novamente.');
+          await showMessage('E-mail inválido. Verifique e tente novamente.');
           e.target.value = '';
           e.target.setCustomValidity('');
           updateEmailHelp('', true);
           updateReview();
           refreshSubmitState();
-          setTimeout(()=>e.target.focus(), 0);
+          e.target.focus();
           return;
         }
         updateEmailHelp(value, ok);
       });
 
-      function enforceRecife(){
+      async function enforceRecife(){
         const input = $('#cidade');
         if(!input) return;
         const value = input.value.trim();
@@ -899,14 +935,15 @@
           input.value = value.toUpperCase();
           input.setCustomValidity('');
         }else{
-          alert('Serviço destina-se exclusivamente para moradores da cidade do Recife');
+          await showMessage('Serviço destina-se exclusivamente para moradores da cidade do Recife');
           ['#cep','#logradouro','#numero','#complemento','#bairro','#cidade','#uf']
             .forEach(sel => {
               const field = $(sel);
               if(field){ field.value = ''; }
             });
           input.setCustomValidity('Serviço destina-se exclusivamente para moradores da cidade do Recife');
-          ( $('#cep') || input ).focus();
+          const focusTarget = $('#cep') || input;
+          if(focusTarget){ focusTarget.focus(); }
         }
         const numeroField = $('#numero');
         if(numeroField){
@@ -920,10 +957,10 @@
 
       $('#cidade').addEventListener('blur', enforceRecife);
       $('#cidade').addEventListener('change', enforceRecife);
-      $('#nascimento').addEventListener('change', e=>{
+      $('#nascimento').addEventListener('change', async e=>{
         const value = e.target.value;
         if(value && !isAdult(value)){
-          alert('A inscrição é permitida apenas para pessoas com 18 anos ou mais.');
+          await showMessage('A inscrição é permitida apenas para pessoas com 18 anos ou mais.');
           e.target.value = '';
           e.target.focus();
         }
@@ -1622,7 +1659,7 @@
           });
           const text = await res.text();
           if(res.ok){
-            alert('Dados enviados com sucesso!');
+            await showMessage('Dados enviados com sucesso!');
             document.getElementById('app').innerHTML = `<div class="py-5 text-center"><h3 class="mb-3">Inscrição recebida</h3><p class="text-muted">Você receberá atualizações pelos canais informados.</p></div>`;
           }else{
             $('#finalStatus').innerHTML = `<span class="badge text-bg-danger">Falha no envio</span>`; $('#finalOut').textContent=text; $('#finalOut').classList.remove('d-none');
