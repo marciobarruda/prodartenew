@@ -34,6 +34,24 @@
       pre.json{ background:#0b1020; color:#e6edf3; border-radius:.75rem; padding:1rem; max-height:40vh; overflow:auto; }
       .badge-soft{ background:#e7f1ff; color:#0b2447; border:1px solid #cfe2ff; }
       .form-control[readonly]{ background:#f8f9fa; }
+      .tiny{ font-size:.85rem; }
+      .declaration-box{
+        background:#f8f9fa;
+        border:1px solid #dbe7ff;
+        border-radius:.75rem;
+        padding:1rem 1.25rem;
+        max-height:240px;
+        overflow:auto;
+        font-size:.95rem;
+        line-height:1.55;
+        color:#0b2447;
+      }
+      .declaration-box strong{ letter-spacing:.3px; }
+      .declaration-box::-webkit-scrollbar{ width:8px; }
+      .declaration-box::-webkit-scrollbar-thumb{ background:#c7d5f8; border-radius:999px; }
+      .declaration-check{ margin-top:1rem; }
+      .declaration-actions .btn{ min-width:140px; }
+      .field-invalid{ border-color:#dc3545 !important; box-shadow:0 0 0 .2rem rgba(220,53,69,.15) !important; }
       .review-table td{ vertical-align: top; }
       .frame-card{
         max-width: 980px;
@@ -87,10 +105,8 @@
               <label class="form-label required" for="tipoCadastro">Tipo de cadastro</label>
               <select id="tipoCadastro" class="form-select" required>
                 <option value="" data-products-id="" selected>Selecione...</option>
-                <option value="artesanato" data-products-id="artesanato">Artesão</option>
-                <option value="economia-solidaria" data-products-id="economia-solidaria">Economia solidária</option>
                 <option value="empreendedor" data-products-id="empreendedor">Empreendedor</option>
-                <option value="gastronomia" data-products-id="gastronomia">Gastronomia</option>
+                <option value="economia-solidaria" data-products-id="economia-solidaria">Economia solidária</option>
               </select>
             </div>
           </div>
@@ -105,6 +121,14 @@
         </div>
         <div class="card-body">
           <div class="row g-3">
+            <div class="col-md-6 d-none" id="segmentoWrap">
+              <label class="form-label required" for="segmento">Segmento</label>
+              <select id="segmento" class="form-select">
+                <option value="" selected>Selecione...</option>
+                <option value="artesanato">Artesanato</option>
+                <option value="gastronomia">Gastronomia</option>
+              </select>
+            </div>
             <div class="col-md-6">
               <label class="form-label required" for="produto">Escolha o produto</label>
               <select id="produto" class="form-select" required disabled>
@@ -146,13 +170,8 @@
             </div>
             <div class="col-md-4">
               <label class="form-label required" for="genero">Identidade de gênero</label>
-              <select id="genero" class="form-select" required>
-                <option value="" selected>Selecione...</option>
-                <option>Feminino</option>
-                <option>Masculino</option>
-                <option>Não-binário</option>
-                <option>Prefiro não informar</option>
-                <option value="OUTRO">Outro</option>
+              <select id="genero" class="form-select" required disabled>
+                <option value="" selected>Carregando opções...</option>
               </select>
             </div>
             <div class="col-md-4 d-none" id="generoOutroWrap">
@@ -164,6 +183,17 @@
                 <option>Transfeminino</option>
                 <option>Transmasculino</option>
                 <option>Outro (especificar na descrição)</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label required" for="raca">Autodeclaração de cor (IBGE)</label>
+              <select id="raca" class="form-select" required>
+                <option value="" selected>Selecione...</option>
+                <option value="BRANCA">Branca</option>
+                <option value="PRETA">Preta</option>
+                <option value="PARDA">Parda</option>
+                <option value="AMARELA">Amarela</option>
+                <option value="INDIGENA">Indígena</option>
               </select>
             </div>
             <div class="col-md-6">
@@ -487,13 +517,35 @@
           <h2 class="h5 mb-0">Revisão e envio</h2>
         </div>
         <div class="card-body">
-          <div id="reviewBlock" class="mb-3"></div>
-          <div class="form-check mb-3">
-            <input class="form-check-input" type="checkbox" id="termoResponsabilidade">
-            <label class="form-check-label" for="termoResponsabilidade">
-              DECLARO que todas as informações fornecidas são verdadeiras e exatas, DECLARO, ainda, estar ciente de que prestar declaração falsa caracteriza o crime de falsidade ideológica previsto no art. 299 do Código Penal Brasileiro, e que por tal crime serei responsabilizado, independentemente das sanções administrativas, caso se comprove a inveracidade do declarado neste documento. DECLARO estar ciente e de acordo com os termos da Política de Privacidade, nos termos da Lei nº 13.709/2018 (Lei Geral de Proteção de Dados Pessoais – LGPD). DECLARO, por fim, que tomo ciência, neste ato, de toda a legislação mencionada acima.
-            </label>
+          <div id="reviewBlock" class="mb-4"></div>
+
+          <div class="mb-4">
+            <h3 class="h6 section-title mb-2">Autodeclaração étnico-racial</h3>
+            <div id="racialDeclarationText" class="declaration-box" tabindex="0" role="textbox" aria-readonly="true"></div>
+            <div class="form-check declaration-check">
+              <input class="form-check-input" type="checkbox" id="racialDeclarationAgree" disabled>
+              <label class="form-check-label" for="racialDeclarationAgree">Confirmo que a autodeclaração acima corresponde à minha manifestação.</label>
+            </div>
+            <div class="form-text tiny mt-2" id="racialDeclarationHint">Role o texto até o final para habilitar o aceite.</div>
           </div>
+
+          <div class="mb-4">
+            <h3 class="h6 section-title mb-2">Declaração de responsabilidade</h3>
+            <div id="responsibilityText" class="declaration-box" tabindex="0" role="textbox" aria-readonly="true">
+              DECLARO que todas as informações fornecidas são verdadeiras e exatas, DECLARO, ainda, estar ciente de que prestar declaração falsa caracteriza o crime de falsidade ideológica previsto no art. 299 do Código Penal Brasileiro, e que por tal crime serei responsabilizado, independentemente das sanções administrativas, caso se comprove a inveracidade do declarado neste documento. DECLARO estar ciente e de acordo com os termos da Política de Privacidade, nos termos da Lei nº 13.709/2018 (Lei Geral de Proteção de Dados Pessoais – LGPD). DECLARO, por fim, que tomo ciência, neste ato, de toda a legislação mencionada acima.
+            </div>
+            <div class="form-check declaration-check">
+              <input class="form-check-input" type="checkbox" id="termoResponsabilidade" disabled>
+              <label class="form-check-label" for="termoResponsabilidade">Li e estou de acordo com a declaração de responsabilidade.</label>
+            </div>
+            <div class="form-text tiny mt-2" id="responsibilityHint">Role o texto até o final para habilitar o aceite.</div>
+          </div>
+
+          <div class="d-flex flex-wrap gap-2 declaration-actions mb-3">
+            <button type="button" class="btn btn-outline-success" id="acceptAllDeclarations">Aceitar tudo</button>
+            <button type="button" class="btn btn-outline-danger" id="declineAllDeclarations">Não aceitar</button>
+          </div>
+
           <div class="d-flex gap-2">
             <button type="button" class="btn btn-secondary" id="btnSubmitAll" disabled>Enviar dados</button>
             <div id="finalStatus" class="ms-2"></div>
@@ -512,6 +564,7 @@
     <script>
       const FINAL_ENDPOINT = "https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/cadastro-prodarte";
       const PRODUCTS_ENDPOINT = "https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/prodarte-produtos";
+      const GENERO_ENDPOINT = "https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/id-genero";
 
       // Utils -------------------------------------------------------------
       const $ = (sel) => document.querySelector(sel);
@@ -536,12 +589,105 @@
         return value || '';
       };
 
+      function setFieldInvalid(el, invalid){
+        if(!el) return;
+        el.classList.toggle('field-invalid', !!invalid);
+      }
+
       // Normalização para produtos ---------------------------------------
       const norm = (s) => String(s || '')
         .normalize('NFD')
         .replace(/[\\u0300-\\u036f]/g, '')
         .trim()
         .toLowerCase();
+
+      async function loadGeneros(prefillValue){
+        const select = document.getElementById('genero');
+        if(!select) return;
+        const previousValue = prefillValue !== undefined ? prefillValue : select.value;
+        select.disabled = true;
+        select.innerHTML = '';
+        select.add(new Option('Carregando...', ''));
+
+        const fallbackOptions = () => {
+          select.innerHTML = '';
+          ['Selecione...', 'Feminino', 'Masculino', 'Não-binário', 'Prefiro não informar', 'Outro'].forEach((label, index) => {
+            const value = index === 0 ? '' : (label === 'Outro' ? 'OUTRO' : label);
+            const option = new Option(label, value);
+            if(index === 0) option.selected = true;
+            select.add(option);
+          });
+          select.disabled = false;
+          if(previousValue && [...select.options].some(opt => opt.value === previousValue)){
+            select.value = previousValue;
+          }
+          select.dispatchEvent(new Event('change', { bubbles: true }));
+        };
+
+        try{
+          const res = await fetch(GENERO_ENDPOINT, { method: 'GET', cache: 'no-store' });
+          if(!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          const list = Array.isArray(data) ? data : (data?.items || data?.dados || data?.data || data?.result || []);
+          const entries = [];
+          const seen = new Set();
+          const pick = (obj, keys) => {
+            for(const key of keys){
+              if(obj && obj[key] !== undefined && obj[key] !== null){
+                const value = String(obj[key]).trim();
+                if(value) return value;
+              }
+            }
+            return '';
+          };
+
+          list.forEach(item => {
+            if(item === null || item === undefined) return;
+            if(typeof item === 'string'){
+              const label = item.trim();
+              if(!label) return;
+              const key = label.toLowerCase();
+              if(seen.has(key)) return;
+              seen.add(key);
+              entries.push({ value: label, label });
+              return;
+            }
+            if(typeof item === 'object'){
+              const label = pick(item, ['label','nome','descricao','descricaoCurta','descricao_curta','description','texto','text']);
+              const rawValue = pick(item, ['valor','value','id','codigo','sigla','slug','nome','label']);
+              const finalLabel = label || rawValue;
+              const finalValue = rawValue || label;
+              if(!finalLabel) return;
+              const key = (finalValue || finalLabel).toLowerCase();
+              if(seen.has(key)) return;
+              seen.add(key);
+              entries.push({ value: finalValue || finalLabel, label: finalLabel });
+            }
+          });
+
+          select.innerHTML = '';
+          select.add(new Option('Selecione...', ''));
+          entries
+            .sort((a,b)=>a.label.localeCompare(b.label,'pt-BR',{ sensitivity:'base' }))
+            .forEach(item => select.add(new Option(item.label, item.value)));
+
+          if(!entries.some(item => String(item.value).toUpperCase() === 'OUTRO')){
+            select.add(new Option('Outro', 'OUTRO'));
+          }
+
+          if(previousValue && [...select.options].some(opt => opt.value === previousValue)){
+            select.value = previousValue;
+          }else{
+            select.value = '';
+          }
+
+          select.disabled = false;
+          select.dispatchEvent(new Event('change', { bubbles: true }));
+        }catch(err){
+          console.warn('Falha ao carregar identidades de gênero:', err);
+          fallbackOptions();
+        }
+      }
 
       // Validators --------------------------------------------------------
       function isValidCPF(cpf){
@@ -816,34 +962,53 @@
       });
 
       // Produtos (carregar e filtrar) ------------------------------------
-      function populateProductsFromResponse(baseList){
+      function populateProductsFromResponse(baseList, segmentoFiltro=''){
         const sel = document.getElementById('produto');
         while (sel.options.length) sel.remove(0);
         sel.add(new Option('Selecione...',''));
 
         const base = Array.isArray(baseList) ? baseList : [];
+        const filtroNorm = segmentoFiltro ? norm(segmentoFiltro) : '';
         const seen = new Set();
         const produtosOrdenados = [];
-        base
-          .map(item => {
-            if(typeof item === 'string') return item;
-            if(item && typeof item === 'object'){
-              return String(item.produto || item.nome || item.label || '').trim();
+        const pick = (obj, keys) => {
+          for(const key of keys){
+            if(obj && obj[key] !== undefined && obj[key] !== null){
+              const value = String(obj[key]).trim();
+              if(value) return value;
             }
-            return '';
-          })
-          .filter(Boolean)
-          .forEach(nome => {
-            const key = norm(nome);
-            if(key === norm('Outros')) return;
-            if(seen.has(key)) return;
-            seen.add(key);
-            produtosOrdenados.push(nome);
-          });
+          }
+          return '';
+        };
+
+        base.forEach(item => {
+          let label = '';
+          let value = '';
+          let segmentoItem = '';
+          if(typeof item === 'string'){
+            label = item.trim();
+            value = label;
+          }else if(item && typeof item === 'object'){
+            label = pick(item, ['produto','nome','label','descricao','description']);
+            value = pick(item, ['valor','value','id','codigo','produto','nome','label']);
+            segmentoItem = pick(item, ['segmento','segment','categoria','categoria_nome','categoriaNome','grupo','tipo']);
+            if(!label) label = value;
+            if(!value) value = label;
+          }
+          if(!label) return;
+          if(filtroNorm){
+            const segNorm = segmentoItem ? norm(segmentoItem) : '';
+            if(segmentoItem && segNorm !== filtroNorm) return;
+          }
+          const key = norm(value || label);
+          if(!key || key === norm('Outros') || seen.has(key)) return;
+          seen.add(key);
+          produtosOrdenados.push({ label, value });
+        });
 
         produtosOrdenados
-          .sort((a,b)=>a.localeCompare(b,'pt-BR',{ sensitivity: 'base' }))
-          .forEach(nome => sel.add(new Option(nome, nome)));
+          .sort((a,b)=>a.label.localeCompare(b.label,'pt-BR',{ sensitivity: 'base' }))
+          .forEach(item => sel.add(new Option(item.label, item.value)));
 
         sel.add(new Option('Outros', 'OUTROS'));
         sel.value = '';
@@ -855,15 +1020,33 @@
         document.getElementById('produtoOutro').value = '';
       }
 
+      function updateSegmentoVisibility(){
+        const tipoSelect = document.getElementById('tipoCadastro');
+        const option = tipoSelect ? tipoSelect.selectedOptions[0] : null;
+        const tipoId = option ? (option.dataset?.productsId || option.value || '').trim() : '';
+        const wrap = document.getElementById('segmentoWrap');
+        const select = document.getElementById('segmento');
+        const show = tipoId === 'empreendedor';
+        if(wrap && select){
+          wrap.classList.toggle('d-none', !show);
+          select.required = show;
+          select.disabled = !show;
+          if(!show){
+            select.value = '';
+          }
+        }
+        return { tipoId, show };
+      }
+
       async function loadProducts(){
         const sel = document.getElementById('produto');
         sel.disabled = true;
         while (sel.options.length) sel.remove(0);
         sel.add(new Option('Carregando...', ''));
 
-        const tipoSelect = document.getElementById('tipoCadastro');
-        const option = tipoSelect ? tipoSelect.selectedOptions[0] : null;
-        const tipoId = option ? (option.dataset?.productsId || option.value || '').trim() : '';
+        const { tipoId, show } = updateSegmentoVisibility();
+        const segmentoSelect = document.getElementById('segmento');
+        const segmentoValor = show && segmentoSelect ? segmentoSelect.value : '';
         const isEconomiaSolidaria = tipoId === 'economia-solidaria';
         const produtoSection = document.getElementById('produtoSection');
         if(produtoSection){
@@ -895,7 +1078,20 @@
 
         sel.required = true;
 
+        if(show && !segmentoValor){
+          while (sel.options.length) sel.remove(0);
+          sel.add(new Option('Selecione o segmento para listar os produtos', ''));
+          sel.value = '';
+          sel.disabled = true;
+          resetProdutoOutro();
+          return;
+        }
+
         const payload = { id: tipoId };
+        if(segmentoValor){
+          payload.segmento = segmentoValor;
+          payload.segment = segmentoValor;
+        }
 
         let products = [];
         try{
@@ -913,7 +1109,7 @@
           products = [];
         }
 
-        populateProductsFromResponse(products);
+        populateProductsFromResponse(products, segmentoValor);
         sel.disabled = false;
         resetProdutoOutro();
       }
@@ -927,6 +1123,12 @@
       });
 
       document.getElementById('tipoCadastro').addEventListener('change', ()=>{
+        updateSegmentoVisibility();
+        loadProducts();
+        updateReview(); refreshSubmitState();
+      });
+
+      document.getElementById('segmento').addEventListener('change', ()=>{
         loadProducts();
         updateReview(); refreshSubmitState();
       });
@@ -1057,11 +1259,16 @@
         const nome=esc($('#nome').value), email=esc(($('#email').value||'').toLowerCase());
         const cpf=fmtCPF($('#cpf').value), tel=esc(onlyDigits($('#celular').value));
         const cep=fmtCEP($('#cep').value), log=esc($('#logradouro').value), num=esc($('#numero').value), bai=esc($('#bairro').value), cid=esc($('#cidade').value), uf=esc(($('#uf').value||'').toUpperCase());
-        const prod = esc($('#produto').value==='OUTROS' ? $('#produtoOutro').value : $('#produto').value);
+        const produtoSelecionado = $('#produto').value==='OUTROS' ? $('#produtoOutro').value : $('#produto').value;
+        const prod = esc(produtoSelecionado);
         const tipoSel = document.getElementById('tipoCadastro');
         const tipoOption = tipoSel ? tipoSel.selectedOptions[0] : null;
         const tipoCadastro = esc(tipoOption ? tipoOption.textContent : tipoSel?.value || '');
+        const segmentoSelect = document.getElementById('segmento');
+        const segmentoLabel = segmentoSelect && segmentoSelect.value ? esc(segmentoSelect.selectedOptions[0]?.textContent || '') : '';
         const genero = esc($('#genero').value==='OUTRO' ? $('#generoOutro').value : $('#genero').value);
+        const racaSelect = document.getElementById('raca');
+        const raca = racaSelect && racaSelect.value ? esc(racaSelect.selectedOptions[0]?.textContent || '') : '';
         const nascimentoFmt = fmtDateBR($('#nascimento').value);
         const enderecoPartes = [];
         if(cep) enderecoPartes.push(cep);
@@ -1071,7 +1278,7 @@
         const cidadeUf = [cid, uf].filter(Boolean).join('/');
         if(cidadeUf) enderecoPartes.push(cidadeUf);
         const enderecoResumo = enderecoPartes.join(' • ');
-        const tipoProdutoResumo = [tipoCadastro, prod].filter(Boolean).join(' • ');
+        const tipoProdutoResumo = [tipoCadastro, segmentoLabel, prod].filter(Boolean).join(' • ');
         $('#reviewBlock').innerHTML = `
           <h6>Resumo</h6>
           <table class="table table-sm review-table">
@@ -1084,45 +1291,222 @@
               <tr><td><strong>Endereço</strong></td><td>${enderecoResumo}</td></tr>
               <tr><td><strong>Tipo de cadastro • Produto</strong></td><td>${tipoProdutoResumo}</td></tr>
               <tr><td><strong>Gênero</strong></td><td>${genero}</td></tr>
+              <tr><td><strong>Cor (IBGE)</strong></td><td>${raca}</td></tr>
             </tbody>
           </table>`;
+        updateRacialDeclaration();
       }
+
+      const racialDeclarationBox = $('#racialDeclarationText');
+      const racialCheckbox = $('#racialDeclarationAgree');
+      const racialHint = $('#racialDeclarationHint');
+      const responsibilityBox = $('#responsibilityText');
+      const responsibilityCheckbox = $('#termoResponsabilidade');
+      const responsibilityHint = $('#responsibilityHint');
+      let lastRacialSignature = '';
+      const declarationDateFormatter = new Intl.DateTimeFormat('pt-BR');
+
+      function resetDeclaration(box, checkbox, hint){
+        if(!box || !checkbox) return;
+        checkbox.checked = false;
+        checkbox.disabled = true;
+        if(hint){
+          hint.textContent = 'Role o texto até o final para habilitar o aceite.';
+        }
+        requestAnimationFrame(()=>{ box.scrollTop = 0; });
+        refreshSubmitState();
+      }
+
+      function markDeclarationReady(checkbox, hint){
+        if(!checkbox || !checkbox.disabled) return;
+        checkbox.disabled = false;
+        if(hint){
+          hint.textContent = 'Marque o checkbox para confirmar.';
+        }
+      }
+
+      function handleScrollable(box, checkbox, hint){
+        if(!box || !checkbox) return;
+        const reachedBottom = Math.ceil(box.scrollTop + box.clientHeight) >= box.scrollHeight - 4;
+        if(reachedBottom){
+          markDeclarationReady(checkbox, hint);
+        }
+      }
+
+      function updateRacialDeclaration(){
+        if(!racialDeclarationBox) return;
+        const nomeUpper = String($('#nome')?.value || '').trim().toUpperCase();
+        const cpfDigits = onlyDigits($('#cpf')?.value);
+        const cpfFormatted = cpfDigits ? fmtCPF(cpfDigits) : '';
+        const racaSelect = $('#raca');
+        const racaLabel = racaSelect && racaSelect.value ? String(racaSelect.selectedOptions[0]?.textContent || '').trim().toUpperCase() : '';
+        const generoSelect = $('#genero');
+        const generoUpper = generoSelect && generoSelect.value ? String(generoSelect.value).trim().toUpperCase() : '';
+        const autodeclaradoWord = generoUpper === 'FEMININO' ? 'AUTODECLARADA' : generoUpper === 'MASCULINO' ? 'AUTODECLARADO' : 'AUTODECLARANTE';
+        const cidadeUpper = String($('#cidade')?.value || '').trim().toUpperCase();
+        const raceKey = racaLabel ? racaLabel.normalize('NFD').replace(/[\u0300-\u036f]/g,'') : '';
+        const raceGenderMap = {
+          FEMININO: { BRANCA:'BRANCA', PRETA:'PRETA', PARDA:'PARDA', AMARELA:'AMARELA', INDIGENA:'INDÍGENA' },
+          MASCULINO: { BRANCA:'BRANCO', PRETA:'PRETO', PARDA:'PARDO', AMARELA:'AMARELO', INDIGENA:'INDÍGENA' }
+        };
+        let raceDisplay = racaLabel;
+        if(raceKey){
+          const map = raceGenderMap[generoUpper] || null;
+          if(map && map[raceKey]){
+            raceDisplay = map[raceKey];
+          }else if(raceGenderMap.FEMININO[raceKey]){
+            raceDisplay = raceGenderMap.FEMININO[raceKey];
+          }
+        }
+        const signature = [nomeUpper, cpfDigits, raceDisplay, cidadeUpper, autodeclaradoWord].join('|');
+        const nameSegment = nomeUpper ? `<strong>${esc(nomeUpper)}</strong>` : '____________________________';
+        const cpfSegment = cpfFormatted ? `<strong>${esc(cpfFormatted.toUpperCase())}</strong>` : '________________';
+        const raceSegment = raceDisplay ? `<strong>${esc(raceDisplay)}</strong>` : '________________';
+        const autodeclaradoSegment = autodeclaradoWord ? `<strong>${esc(autodeclaradoWord)}</strong>` : '________________';
+        const citySegment = cidadeUpper ? `<strong>${esc(cidadeUpper)}</strong>` : '________________';
+        const dateStr = declarationDateFormatter.format(new Date());
+        const raceSentence = `sou ${autodeclaradoSegment} ${raceSegment}.`;
+        const locationLine = [citySegment, `<strong>${esc(dateStr)}</strong>`].filter(Boolean).join(', ');
+        const template = [
+          'Para fins do disposto na Portaria do Ministério do Trabalho nº3784/2023, em cumprimento da Lei 14.553/02023.',
+          'As informações relativas à etnia e raça devem ser obrigatoriamente prestadas nas inclusões, alterações ou retificações cadastrais dos trabalhadores, respeitando o critério de autodeclaração do trabalhador, em conformidade com a classificação utilizada pelo Instituto Brasileiro de Geografia e Estatística– IBGE.',
+          '',
+          `Eu, ${nameSegment},`,
+          `portador do CPF nº ${cpfSegment}, AUTODECLARO, sob penas de lei que,`,
+          raceSentence,
+          '',
+          'Por ser expressão da verdade, firmo e assino a presente para que a mesma produza seus efeitos legais e de direito.',
+          locationLine
+        ].join('\n');
+        const hasChanged = signature !== lastRacialSignature;
+        if(hasChanged){
+          lastRacialSignature = signature;
+          resetDeclaration(racialDeclarationBox, racialCheckbox, racialHint);
+        }
+        racialDeclarationBox.innerHTML = template;
+      }
+
+      racialDeclarationBox?.addEventListener('scroll', ()=>handleScrollable(racialDeclarationBox, racialCheckbox, racialHint));
+      responsibilityBox?.addEventListener('scroll', ()=>handleScrollable(responsibilityBox, responsibilityCheckbox, responsibilityHint));
+      racialCheckbox?.addEventListener('change', refreshSubmitState);
+      responsibilityCheckbox?.addEventListener('change', refreshSubmitState);
+
+      const acceptAllBtn = $('#acceptAllDeclarations');
+      const declineAllBtn = $('#declineAllDeclarations');
+      acceptAllBtn?.addEventListener('click', ()=>{
+        if(racialDeclarationBox){
+          racialDeclarationBox.scrollTop = racialDeclarationBox.scrollHeight;
+          handleScrollable(racialDeclarationBox, racialCheckbox, racialHint);
+        }
+        if(responsibilityBox){
+          responsibilityBox.scrollTop = responsibilityBox.scrollHeight;
+          handleScrollable(responsibilityBox, responsibilityCheckbox, responsibilityHint);
+        }
+        if(racialCheckbox){
+          markDeclarationReady(racialCheckbox, racialHint);
+          racialCheckbox.checked = true;
+        }
+        if(responsibilityCheckbox){
+          markDeclarationReady(responsibilityCheckbox, responsibilityHint);
+          responsibilityCheckbox.checked = true;
+        }
+        refreshSubmitState();
+      });
+      declineAllBtn?.addEventListener('click', ()=>{
+        if(racialCheckbox){
+          racialCheckbox.checked = false;
+        }
+        if(responsibilityCheckbox){
+          responsibilityCheckbox.checked = false;
+        }
+        refreshSubmitState();
+      });
 
       // Submit state ------------------------------------------------------
       function refreshSubmitState(){
-        const requiredFilled = [
-          '#tipoCadastro','#produto','#cpf','#nome','#genero','#mae','#nascimento',
+        const requiredSelectors = [
+          '#tipoCadastro','#segmento','#produto','#cpf','#nome','#genero','#raca','#mae','#nascimento',
           '#email','#celular','#cep','#logradouro','#numero','#bairro','#cidade','#uf',
           '#sobreTrabalho','#tempoAtv','#renda','#divulgacao','#docFrente','#docVerso','#compDomicilio','#foto1','#foto2'
-        ].every(sel=>{
-          const el=$(sel); if(!el) return true; if(el.type==='file') return (el.files||[]).length>0; return !!(el.value && String(el.value).trim());
+        ];
+        let requiredFilled = true;
+        requiredSelectors.forEach(sel => {
+          const el = $(sel);
+          if(!el) return;
+          const hidden = el.closest('.d-none');
+          if(el.disabled || hidden){
+            setFieldInvalid(el, false);
+            return;
+          }
+          let ok = true;
+          if(el.type === 'file'){
+            ok = (el.files || []).length > 0;
+          }else if(el.type === 'checkbox' || el.type === 'radio'){
+            ok = !!el.checked;
+          }else{
+            ok = !!String(el.value || '').trim();
+          }
+          if(!ok){
+            requiredFilled = false;
+          }
+          setFieldInvalid(el, !ok);
         });
+
         const cpfOk=isValidCPF($('#cpf').value);
+        setFieldInvalid($('#cpf'), !cpfOk);
         const celOk=isValidCell($('#celular').value);
+        setFieldInvalid($('#celular'), !celOk);
         const emailOk=isValidEmail($('#email').value);
+        setFieldInvalid($('#email'), !emailOk);
         const nascimentoVal = $('#nascimento').value;
         let nascimentoOk = false;
         if(nascimentoVal && nascimentoVal.length === 10){
           nascimentoOk = isAdult(nascimentoVal);
           $('#nascimento').setCustomValidity(nascimentoOk ? '' : 'É necessário ser maior de 18 anos.');
+          setFieldInvalid($('#nascimento'), !nascimentoOk);
         }else{
           $('#nascimento').setCustomValidity('');
+          setFieldInvalid($('#nascimento'), false);
         }
         const cnpjIsReq = document.getElementById('meiSim').checked;
         const cnpjOk = !cnpjIsReq || isValidCNPJ($('#cnpj').value);
+        if(cnpjIsReq){
+          setFieldInvalid($('#cnpj'), !cnpjOk);
+        }else{
+          setFieldInvalid($('#cnpj'), false);
+        }
         const certReqOk = !cnpjIsReq || ($('#certMeiCnpj').files||[]).length>0;
+        if(cnpjIsReq){
+          setFieldInvalid($('#certMeiCnpj'), !certReqOk);
+        }else{
+          setFieldInvalid($('#certMeiCnpj'), false);
+        }
         // campos condicionais
         const produtoOutroOk = ($('#produto').value!=='OUTROS') || (!!$('#produtoOutro').value.trim());
+        setFieldInvalid($('#produtoOutro'), !produtoOutroOk && !$('#produtoOutroWrap').classList.contains('d-none'));
         const generoOutroOk = ($('#genero').value!=='OUTRO') || (!!$('#generoOutro').value);
+        setFieldInvalid($('#generoOutro'), !generoOutroOk && $('#genero').value==='OUTRO');
         const divulgOrgOk = ($('#divulgacao').value!=='EVENTO_ORG') || (!!$('#organizador').value);
-        const divulgOutroOk = ($('#divulgacao').value!=='OUTRO') || (!!$('#comoSoube').value);
+        setFieldInvalid($('#organizador'), !divulgOrgOk && $('#divulgacao').value==='EVENTO_ORG');
+        const divulgOutroOk = ($('#divulgacao').value!=='OUTRO') || (!!($('#comoSoube').value||'').trim());
+        setFieldInvalid($('#comoSoube'), !divulgOutroOk && $('#divulgacao').value==='OUTRO');
         const assocSim = document.getElementById('assocSim').checked;
         const assocDescOk = !assocSim || (!!($('#assocDesc').value||'').trim());
+        setFieldInvalid($('#assocDesc'), !assocDescOk && assocSim);
         const cityOk = isRecifeCity($('#cidade').value);
+        setFieldInvalid($('#cidade'), !cityOk && !!$('#cidade').value.trim());
         const termoEl = $('#termoResponsabilidade');
+        const racialCheckbox = $('#racialDeclarationAgree');
         const termoOk = termoEl ? termoEl.checked : false;
+        const racialOk = racialCheckbox ? racialCheckbox.checked : false;
+        if(termoEl && !termoEl.disabled){
+          setFieldInvalid(termoEl, !termoOk);
+        }
+        if(racialCheckbox && !racialCheckbox.disabled){
+          setFieldInvalid(racialCheckbox, !racialOk);
+        }
 
-        const allOk = requiredFilled && cpfOk && celOk && emailOk && nascimentoOk && cnpjOk && certReqOk && produtoOutroOk && generoOutroOk && divulgOrgOk && divulgOutroOk && assocDescOk && cityOk && termoOk;
+        const allOk = requiredFilled && cpfOk && celOk && emailOk && nascimentoOk && cnpjOk && certReqOk && produtoOutroOk && generoOutroOk && divulgOrgOk && divulgOutroOk && assocDescOk && cityOk && termoOk && racialOk;
         const btn=$('#btnSubmitAll');
         btn.disabled = !allOk; btn.classList.toggle('btn-success', allOk); btn.classList.toggle('btn-secondary', !allOk);
       }
@@ -1130,7 +1514,7 @@
       // Files/inputs listeners for submit state + review
       const allWatch = ['change','input','blur'];
       const selectors = [
-        '#tipoCadastro','#produto','#produtoOutro','#genero','#generoOutro','#cpf','#nome','#nomeSocial','#rg',
+        '#tipoCadastro','#segmento','#produto','#produtoOutro','#genero','#generoOutro','#raca','#cpf','#nome','#nomeSocial','#rg',
         '#mae','#pai','#nascimento','#email','#celular','#cep','#logradouro','#numero','#bairro','#cidade','#uf',
         '#carteiraSim','#carteiraNao','#numCarteira','#instagram','#marca','#meiSim','#meiNao','#cnpj','#fantasia',
         '#formSim','#formNao','#abrirMeiSim','#abrirMeiNao','#divulgacao','#organizador','#comoSoube',
@@ -1138,6 +1522,12 @@
         '#docFrente','#docVerso','#compDomicilio','#certMeiCnpj','#foto1','#foto2','#foto3','#foto4','#sobreTrabalho','#tempoAtv','#renda','#termoResponsabilidade'
       ];
       selectors.forEach(sel=>{ const el=$(sel); if(!el) return; allWatch.forEach(evt=> el.addEventListener(evt, ()=>{ updateReview(); refreshSubmitState(); })); });
+
+      function disableAutocomplete(){
+        document.querySelectorAll('input, select, textarea').forEach(el=>{
+          el.setAttribute('autocomplete','off');
+        });
+      }
 
       // Rascunho local ----------------------------------------------------
       const fieldsForDraft = selectors.filter(s=>!['#docFrente','#docVerso','#compDomicilio','#certMeiCnpj','#foto1','#foto2','#foto3','#foto4'].includes(s));
@@ -1158,6 +1548,10 @@
           fd.append('tipo_cadastro', $('#tipoCadastro').value);
           fd.append('tipo_cadastro_label', tipoOption ? tipoOption.textContent.trim() : '');
           fd.append('tipo_cadastro_produtos_id', tipoOption ? (tipoOption.dataset?.productsId || '') : '');
+          const segmentoSelect = document.getElementById('segmento');
+          const segmentoOption = segmentoSelect ? segmentoSelect.selectedOptions[0] : null;
+          fd.append('segmento', segmentoSelect && !segmentoSelect.disabled ? segmentoSelect.value : '');
+          fd.append('segmento_label', segmentoOption ? segmentoOption.textContent.trim() : '');
           const produtoFinal = $('#produto').value==='OUTROS' ? $('#produtoOutro').value : $('#produto').value;
           fd.append('produto', produtoFinal);
           fd.append('produto_outro', $('#produtoOutro').value.trim());
@@ -1167,6 +1561,10 @@
           fd.append('nome_social', $('#nomeSocial').value.trim());
           fd.append('rg', $('#rg').value.trim());
           fd.append('genero', $('#genero').value==='OUTRO' ? $('#generoOutro').value : $('#genero').value);
+          const racaSelect = document.getElementById('raca');
+          const racaOption = racaSelect ? racaSelect.selectedOptions[0] : null;
+          fd.append('autodeclaracao_cor', racaSelect ? racaSelect.value : '');
+          fd.append('autodeclaracao_cor_label', racaOption ? racaOption.textContent.trim() : '');
           fd.append('mae', $('#mae').value.trim());
           fd.append('pai', $('#pai').value.trim());
           fd.append('nascimento', $('#nascimento').value);
@@ -1201,6 +1599,8 @@
           fd.append('organizador', $('#organizador').value);
           fd.append('como_soube', $('#comoSoube').value);
           fd.append('termo_responsabilidade', document.getElementById('termoResponsabilidade')?.checked ? 'ACEITO' : 'NAO');
+          fd.append('autodeclaracao_racial', racialCheckbox && racialCheckbox.checked ? 'ACEITO' : 'NAO');
+          fd.append('autodeclaracao_racial_texto', (racialDeclarationBox?.innerText || '').trim());
 
           // Anexos
           const f = id => document.getElementById(id).files[0];
@@ -1221,9 +1621,15 @@
 
       // Init --------------------------------------------------------------
       function init(){
+        disableAutocomplete();
         loadDraft();
         toggleAssocDesc();
         enforceRecife();
+        updateSegmentoVisibility();
+        resetDeclaration(racialDeclarationBox, racialCheckbox, racialHint);
+        resetDeclaration(responsibilityBox, responsibilityCheckbox, responsibilityHint);
+        const generoStored = $('#genero')?.value || '';
+        loadGeneros(generoStored);
         const emailValue = ($('#email')?.value || '').trim();
         updateEmailHelp(emailValue, isValidEmail(emailValue));
         const numeroEl = $('#numero');
