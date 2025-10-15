@@ -186,22 +186,17 @@
             </div>
           </div>
           <div class="row g-3 mt-0">
-            <div class="col-md-4">
+            <div class="col-md-6">
               <label class="form-label required" for="genero">Gênero</label>
               <select id="genero" class="form-select" required>
                 <option value="" selected>Selecione...</option>
                 <option value="FEMININO">Feminino</option>
                 <option value="MASCULINO">Masculino</option>
                 <option value="NAO_INFORMAR">Prefiro não informar</option>
+                <option value="OUTROS">Outros</option>
               </select>
             </div>
-            <div class="col-md-4">
-              <label class="form-label required" for="identidadeGenero">Informe a identidade de gênero</label>
-              <select id="identidadeGenero" class="form-select" required disabled>
-                <option value="" selected>Carregando opções...</option>
-              </select>
-            </div>
-            <div class="col-md-4">
+            <div class="col-md-6">
               <label class="form-label required" for="raca">Autodeclaração de cor (IBGE)</label>
               <select id="raca" class="form-select" required>
                 <option value="" selected>Selecione...</option>
@@ -587,7 +582,6 @@
     <script>
       const FINAL_ENDPOINT = "https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/cadastro-prodarte";
       const PRODUCTS_ENDPOINT = "https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/prodarte-produtos";
-      const GENERO_ENDPOINT = "https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/id-genero";
 
       const messageModalEl = document.getElementById('messageModal');
       const messageModalBody = document.getElementById('messageModalBody');
@@ -642,58 +636,6 @@
         .replace(/[\\u0300-\\u036f]/g, '')
         .trim()
         .toLowerCase();
-
-      async function loadIdentidadesGenero(prefillValue){
-        const select = document.getElementById('identidadeGenero');
-        if(!select) return;
-        const previousValue = prefillValue ?? select.value;
-        select.disabled = true;
-        select.innerHTML = '';
-        select.add(new Option('Carregando...', ''));
-
-        const preencher = (opcoes) => {
-          const unique = Array.from(new Set(opcoes.map(opt => opt.trim()).filter(Boolean)));
-          select.innerHTML = '';
-          select.add(new Option('Selecione...', ''));
-          unique
-            .sort((a,b)=>a.localeCompare(b,'pt-BR',{ sensitivity:'base' }))
-            .forEach(label => select.add(new Option(label, label)));
-          if(previousValue && [...select.options].some(opt => opt.value === previousValue)){
-            select.value = previousValue;
-          }else{
-            select.value = '';
-          }
-          select.disabled = false;
-          select.dispatchEvent(new Event('change', { bubbles: true }));
-        };
-
-        try{
-          const res = await fetch(GENERO_ENDPOINT, { method: 'GET', cache: 'no-store' });
-          if(!res.ok) throw new Error(`HTTP ${res.status}`);
-          const data = await res.json();
-          const lista = Array.isArray(data) ? data : (data?.items || data?.dados || data?.data || data?.result || []);
-          const valores = lista.map(item => {
-            if(typeof item === 'string') return item;
-            if(item && typeof item === 'object'){
-              return String(item.identidade || item.nome || item.label || '').trim();
-            }
-            return '';
-          });
-          if(valores.some(Boolean)){
-            preencher(valores);
-            return;
-          }
-          throw new Error('Lista vazia');
-        }catch(err){
-          console.warn('Falha ao carregar identidades de gênero:', err);
-          const fallback = [
-            'Agênero','Andrógino','Apogênero','Autigênero','Bigênero','Cisgênero','Condigênero','Demiboy','Demigirl','Demigênero',
-            'Genderflux','Girlflux','Gênero fluido','Intergênero','Libragênero','Maverique','Neutrois','Novigênero','Não-binárie',
-            'Pangênero','Poligênero','Queer','Transexual','Transgênero','Travesti','Virflux','Xenogênero'
-          ];
-          preencher(fallback);
-        }
-      }
 
       // Validators --------------------------------------------------------
       function isValidCPF(cpf){
@@ -1267,8 +1209,6 @@
         const segmentoLabel = segmentoSelect && segmentoSelect.value ? esc(segmentoSelect.selectedOptions[0]?.textContent || '') : '';
         const generoSelect = document.getElementById('genero');
         const genero = generoSelect && generoSelect.value ? esc(generoSelect.selectedOptions[0]?.textContent || '') : '';
-        const identidadeSelect = document.getElementById('identidadeGenero');
-        const identidadeGenero = identidadeSelect && identidadeSelect.value ? esc(identidadeSelect.selectedOptions[0]?.textContent || '') : '';
         const racaSelect = document.getElementById('raca');
         const raca = racaSelect && racaSelect.value ? esc(racaSelect.selectedOptions[0]?.textContent || '') : '';
         const nascimentoFmt = fmtDateBR($('#nascimento').value);
@@ -1293,7 +1233,6 @@
               <tr><td><strong>Endereço</strong></td><td>${enderecoResumo}</td></tr>
               <tr><td><strong>Tipo de cadastro • Produto</strong></td><td>${tipoProdutoResumo}</td></tr>
               <tr><td><strong>Gênero</strong></td><td>${genero}</td></tr>
-              <tr><td><strong>Identidade de gênero</strong></td><td>${identidadeGenero}</td></tr>
               <tr><td><strong>Cor (IBGE)</strong></td><td>${raca}</td></tr>
             </tbody>
           </table>`;
@@ -1428,7 +1367,7 @@
       // Submit state ------------------------------------------------------
       function refreshSubmitState(){
         const requiredSelectors = [
-          '#tipoCadastro','#segmento','#produto','#cpf','#nome','#genero','#identidadeGenero','#raca','#mae','#nascimento',
+          '#tipoCadastro','#segmento','#produto','#cpf','#nome','#genero','#raca','#mae','#nascimento',
           '#email','#celular','#cep','#logradouro','#numero','#bairro','#cidade','#uf',
           '#sobreTrabalho','#tempoAtv','#renda','#divulgacao','#docFrente','#docVerso','#compDomicilio','#foto1','#foto2'
         ];
@@ -1515,7 +1454,7 @@
       // Files/inputs listeners for submit state + review
       const allWatch = ['change','input','blur'];
       const selectors = [
-        '#tipoCadastro','#segmento','#produto','#produtoOutro','#genero','#identidadeGenero','#raca','#cpf','#nome','#nomeSocial','#rg',
+        '#tipoCadastro','#segmento','#produto','#produtoOutro','#genero','#raca','#cpf','#nome','#nomeSocial','#rg',
         '#mae','#pai','#nascimento','#email','#celular','#cep','#logradouro','#numero','#bairro','#cidade','#uf',
         '#carteiraSim','#carteiraNao','#numCarteira','#instagram','#marca','#meiSim','#meiNao','#cnpj','#fantasia',
         '#formSim','#formNao','#abrirMeiSim','#abrirMeiNao','#divulgacao','#organizador','#comoSoube',
@@ -1589,8 +1528,6 @@
           const segmentoOption = segmentoSelect ? segmentoSelect.selectedOptions[0] : null;
           const generoSelect = document.getElementById('genero');
           const generoOption = generoSelect ? generoSelect.selectedOptions[0] : null;
-          const identidadeSelect = document.getElementById('identidadeGenero');
-          const identidadeOption = identidadeSelect ? identidadeSelect.selectedOptions[0] : null;
           const racaSelect = document.getElementById('raca');
           const racaOption = racaSelect ? racaSelect.selectedOptions[0] : null;
           const produtoFinal = $('#produto').value==='OUTROS' ? $('#produtoOutro').value : $('#produto').value;
@@ -1610,8 +1547,6 @@
             rg: $('#rg').value.trim(),
             genero: generoSelect ? generoSelect.value : '',
             genero_label: generoOption ? generoOption.textContent.trim() : '',
-            identidade_genero: identidadeSelect && !identidadeSelect.disabled ? identidadeSelect.value : '',
-            identidade_genero_label: identidadeOption ? identidadeOption.textContent.trim() : '',
             autodeclaracao_cor: racaSelect ? racaSelect.value : '',
             autodeclaracao_cor_label: racaOption ? racaOption.textContent.trim() : '',
             mae: $('#mae').value.trim(),
@@ -1677,8 +1612,6 @@
         updateSegmentoVisibility();
         resetDeclaration(racialDeclarationBox, racialCheckbox, racialHint);
         resetDeclaration(responsibilityBox, responsibilityCheckbox, responsibilityHint);
-        const identidadeStored = $('#identidadeGenero')?.value || '';
-        loadIdentidadesGenero(identidadeStored);
         const emailValue = ($('#email')?.value || '').trim();
         updateEmailHelp(emailValue, isValidEmail(emailValue));
         const numeroEl = $('#numero');
