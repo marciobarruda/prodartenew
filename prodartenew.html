@@ -50,6 +50,18 @@
       .declaration-box::-webkit-scrollbar{ width:8px; }
       .declaration-box::-webkit-scrollbar-thumb{ background:#c7d5f8; border-radius:999px; }
       .declaration-check{ margin-top:1rem; }
+      .declaration-check .form-check-input{
+        width:1.3em;
+        height:1.3em;
+        border:2px solid #0b2447;
+        border-radius:.3rem;
+        accent-color:#0b2447;
+        margin-top:.15em;
+      }
+      .declaration-check .form-check-input:focus{
+        box-shadow:0 0 0 .25rem rgba(13,110,253,.2);
+        border-color:#0b2447;
+      }
       .declaration-actions .btn{ min-width:140px; }
       .field-invalid{ border-color:#dc3545 !important; box-shadow:0 0 0 .2rem rgba(220,53,69,.15) !important; }
       .review-table td{ vertical-align: top; }
@@ -105,8 +117,8 @@
               <label class="form-label required" for="tipoCadastro">Tipo de cadastro</label>
               <select id="tipoCadastro" class="form-select" required>
                 <option value="" data-products-id="" selected>Selecione...</option>
-                <option value="empreendedor" data-products-id="empreendedor">Empreendedor</option>
-                <option value="economia-solidaria" data-products-id="economia-solidaria">Economia solidária</option>
+                <option value="EMPREENDEDOR" data-products-id="empreendedor">Empreendedor</option>
+                <option value="ECONOMIA SOLIDÁRIA" data-products-id="economia-solidaria">Economia solidária</option>
               </select>
             </div>
           </div>
@@ -524,10 +536,10 @@
             <h3 class="h6 section-title mb-2">Autodeclaração étnico-racial</h3>
             <div id="racialDeclarationText" class="declaration-box" tabindex="0" role="textbox" aria-readonly="true"></div>
             <div class="form-check declaration-check">
-              <input class="form-check-input" type="checkbox" id="racialDeclarationAgree" disabled>
+              <input class="form-check-input" type="checkbox" id="racialDeclarationAgree">
               <label class="form-check-label" for="racialDeclarationAgree">Confirmo que a autodeclaração acima corresponde à minha manifestação.</label>
             </div>
-            <div class="form-text tiny mt-2" id="racialDeclarationHint">Role o texto até o final para habilitar o aceite.</div>
+            <div class="form-text tiny mt-2" id="racialDeclarationHint">Leia o texto completo e marque o aceite quando estiver de acordo.</div>
           </div>
 
           <div class="mb-4">
@@ -536,10 +548,10 @@
               DECLARO que todas as informações fornecidas são verdadeiras e exatas, DECLARO, ainda, estar ciente de que prestar declaração falsa caracteriza o crime de falsidade ideológica previsto no art. 299 do Código Penal Brasileiro, e que por tal crime serei responsabilizado, independentemente das sanções administrativas, caso se comprove a inveracidade do declarado neste documento. DECLARO estar ciente e de acordo com os termos da Política de Privacidade, nos termos da Lei nº 13.709/2018 (Lei Geral de Proteção de Dados Pessoais – LGPD). DECLARO, por fim, que tomo ciência, neste ato, de toda a legislação mencionada acima.
             </div>
             <div class="form-check declaration-check">
-              <input class="form-check-input" type="checkbox" id="termoResponsabilidade" disabled>
+              <input class="form-check-input" type="checkbox" id="termoResponsabilidade">
               <label class="form-check-label" for="termoResponsabilidade">Li e estou de acordo com a declaração de responsabilidade.</label>
             </div>
-            <div class="form-text tiny mt-2" id="responsibilityHint">Role o texto até o final para habilitar o aceite.</div>
+            <div class="form-text tiny mt-2" id="responsibilityHint">Leia o texto completo e marque o aceite quando estiver de acordo.</div>
           </div>
 
           <div class="d-flex flex-wrap gap-2 declaration-actions mb-3">
@@ -1245,23 +1257,23 @@
       const responsibilityBox = $('#responsibilityText');
       const responsibilityCheckbox = $('#termoResponsabilidade');
       const responsibilityHint = $('#responsibilityHint');
+      const declarationHintDefault = 'Leia o texto completo e marque o aceite quando estiver de acordo.';
       let lastRacialSignature = '';
       const declarationDateFormatter = new Intl.DateTimeFormat('pt-BR');
 
       function resetDeclaration(box, checkbox, hint){
         if(!box || !checkbox) return;
         checkbox.checked = false;
-        checkbox.disabled = true;
+        checkbox.disabled = false;
         if(hint){
-          hint.textContent = 'Role o texto até o final para habilitar o aceite.';
+          hint.textContent = declarationHintDefault;
         }
         requestAnimationFrame(()=>{ box.scrollTop = 0; });
         refreshSubmitState();
       }
 
       function markDeclarationReady(checkbox, hint){
-        if(!checkbox || !checkbox.disabled) return;
-        checkbox.disabled = false;
+        if(!checkbox) return;
         if(hint){
           hint.textContent = 'Marque o checkbox para confirmar.';
         }
@@ -1357,9 +1369,11 @@
       declineAllBtn?.addEventListener('click', ()=>{
         if(racialCheckbox){
           racialCheckbox.checked = false;
+          if(racialHint){ racialHint.textContent = declarationHintDefault; }
         }
         if(responsibilityCheckbox){
           responsibilityCheckbox.checked = false;
+          if(responsibilityHint){ responsibilityHint.textContent = declarationHintDefault; }
         }
         refreshSubmitState();
       });
