@@ -216,12 +216,17 @@
             <div class="col-md-6">
               <label class="form-label required" for="dataNascimento">Data de nascimento</label>
               <input
-                type="date"
+                type="text"
                 class="form-control"
                 id="dataNascimento"
                 name="dataNascimento"
+                placeholder="DD/MM/AAAA"
+                maxlength="10"
+                inputmode="numeric"
+                pattern="\\d*"
                 required
               >
+              <input type="hidden" id="dataNascimentoISO" name="dataNascimentoISO">
               <div class="invalid-feedback" id="dataNascimentoFeedback">Informe uma data válida no formato DD/MM/AAAA.</div>
             </div>
           </div>
@@ -759,8 +764,61 @@
       const esc = s => { const d=document.createElement('div'); d.innerText=s??''; return d.innerHTML||''; };
       const fmtCPF = v => { const d = onlyDigits(v||''); return d.length===11 ? d.replace(/(\\d{3})(\\d{3})(\\d{3})(\\d{2})/,'$1.$2.$3-$4') : (d||''); };
       const fmtCEP = v => { const d = onlyDigits(v||''); return d.length===8 ? d.replace(/(\d{5})(\d{3})/,'$1-$2') : (d||''); };
-      const ISO_DATE_REGEX = /^(\d{4})-(\d{2})-(\d{2})$/;
       const MIN_BIRTH_YEAR = 1900;
+      function formatarData(value){
+        const digits = onlyDigits(value).slice(0,8);
+        if(digits.length <= 2) return digits;
+        if(digits.length <= 4) return `${digits.slice(0,2)}/${digits.slice(2)}`;
+        return `${digits.slice(0,2)}/${digits.slice(2,4)}/${digits.slice(4)}`;
+      }
+      function parseDataBR(value){
+        const str = String(value || '').trim();
+        if(!/^\d{2}\/\d{2}\/\d{4}$/.test(str)){
+          return { ok:false, reason:'format' };
+        }
+        const [dStr, mStr, yStr] = str.split('/');
+        const day = Number(dStr);
+        const month = Number(mStr);
+        const year = Number(yStr);
+        if(!Number.isInteger(day) || !Number.isInteger(month) || !Number.isInteger(year)){
+          return { ok:false, reason:'format' };
+        }
+        if(year < MIN_BIRTH_YEAR){
+          return { ok:false, reason:'range' };
+        }
+        const today = new Date();
+        if(year > today.getFullYear()){
+          return { ok:false, reason:'future' };
+        }
+        if(month < 1 || month > 12){
+          return { ok:false, reason:'range' };
+        }
+        const monthDays = [31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+        const maxDay = monthDays[month - 1] || 31;
+        if(day < 1 || day > maxDay){
+          return { ok:false, reason:'range' };
+        }
+        const candidate = new Date(year, month - 1, day);
+        if(Number.isNaN(candidate.getTime()) || candidate.getFullYear() !== year || candidate.getMonth() !== month - 1 || candidate.getDate() !== day){
+          return { ok:false, reason:'format' };
+        }
+        if(candidate > today){
+          return { ok:false, reason:'future' };
+        }
+        return { ok:true, day, month, year };
+      }
+      function validarDataBR(value){
+        return parseDataBR(value).ok;
+      }
+      function brParaIso(value){
+        const parsed = parseDataBR(value);
+        if(!parsed.ok){
+          return '';
+        }
+        const { day, month, year } = parsed;
+        return `${String(year).padStart(4,'0')}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+      }
+      const ISO_DATE_REGEX = /^(\d{4})-(\d{2})-(\d{2})$/;
       const isLeapYear = (year) => {
         const y = Number(year);
         if(!Number.isFinite(y)) return false;
@@ -774,9 +832,29 @@
         }
         return value;
       };
+      function applyBirthdateMask(input, rawValue, cursorPosition){
+        if(!input) return '';
+        const raw = rawValue !== undefined ? String(rawValue) : input.value;
+        const cursor = typeof cursorPosition === 'number' ? cursorPosition : (input.selectionStart ?? raw.length);
+        const digitsBefore = onlyDigits(raw.slice(0, cursor)).slice(0,8);
+        const formatted = formatarData(raw);
+        input.value = formatted;
+        let newCursor = digitsBefore.length;
+        if(newCursor > 2) newCursor += 1;
+        if(newCursor > 4) newCursor += 1;
+        const finalCursor = Math.min(formatted.length, newCursor);
+        requestAnimationFrame(()=> input.setSelectionRange(finalCursor, finalCursor));
+        return formatted;
+      }
       function getDataNascimentoISO(){
-        const input = $('#dataNascimento');
-        return input ? input.value : '';
+        const hidden = $('#dataNascimentoISO');
+        return hidden ? hidden.value : '';
+      }
+      function setDataNascimentoISO(value){
+        const hidden = $('#dataNascimentoISO');
+        if(hidden){
+          hidden.value = value || '';
+        }
       }
       const FIELD_LABELS = {
         '#tipoCadastro': 'Tipo de cadastro',
@@ -1108,50 +1186,43 @@
         const { showFeedback = false } = options;
         const input = $('#dataNascimento');
         if(!input){
+          setDataNascimentoISO('');
           return { valid:false, iso:'', reason:'missing', message:BIRTHDATE_INVALID_MESSAGE };
         }
         const defaultMessage = BIRTHDATE_INVALID_MESSAGE;
-        const iso = (input.value || '').trim();
-        const today = new Date();
+        const raw = (input.value || '').trim();
         let result = { valid:false, iso:'', reason:'', message:defaultMessage };
 
-        if(!iso){
+        if(!raw){
+          setDataNascimentoISO('');
           result.reason = 'empty';
-        }else if(!ISO_DATE_REGEX.test(iso)){
-          result.reason = 'format';
         }else{
-          const [yearStr, monthStr, dayStr] = iso.split('-');
-          const year = Number(yearStr);
-          const month = Number(monthStr);
-          const day = Number(dayStr);
-          if(!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day)){
-            result.reason = 'format';
-          }else if(year < MIN_BIRTH_YEAR || year > today.getFullYear()){
-            result.reason = 'range';
-          }else if(month < 1 || month > 12){
-            result.reason = 'range';
-          }else{
-            const monthDays = [31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-            const maxDay = monthDays[month - 1] || 31;
-            if(day < 1 || day > maxDay){
-              result.reason = 'range';
+          const parsed = parseDataBR(raw);
+          if(!parsed.ok){
+            setDataNascimentoISO('');
+            result.reason = parsed.reason || 'format';
+            if(result.reason === 'future'){
+              result.message = 'A data informada não pode ser futura.';
             }else{
-              const candidate = new Date(year, month - 1, day);
-              if(Number.isNaN(candidate.getTime()) || candidate.getFullYear() !== year || candidate.getMonth() !== month - 1 || candidate.getDate() !== day){
-                result.reason = 'format';
-              }else if(candidate > today){
-                result.reason = 'future';
-              }else if(!isAdultISO(iso)){
-                result = { valid:false, iso:'', reason:'age', message:BIRTHDATE_AGE_MESSAGE };
-              }else{
-                result = { valid:true, iso, reason:'valid', message:'' };
-              }
+              result.message = defaultMessage;
+            }
+          }else{
+            const iso = brParaIso(raw);
+            if(!iso){
+              setDataNascimentoISO('');
+              result.reason = 'format';
+            }else if(!isAdultISO(iso)){
+              setDataNascimentoISO('');
+              result = { valid:false, iso:'', reason:'age', message:BIRTHDATE_AGE_MESSAGE };
+            }else{
+              setDataNascimentoISO(iso);
+              result = { valid:true, iso, reason:'valid', message:'' };
             }
           }
         }
 
         if(showFeedback){
-          if(result.valid){
+          if(result.valid || result.reason === 'empty'){
             input.classList.remove('is-invalid');
             setFieldInvalid(input, false);
             input.setCustomValidity('');
@@ -1171,16 +1242,35 @@
       const birthInput = $('#dataNascimento');
       if(birthInput){
         updateBirthdateFeedback(BIRTHDATE_INVALID_MESSAGE);
-        birthInput.addEventListener('input', ()=>{
+        birthInput.addEventListener('keydown', e=>{
+          if(e.ctrlKey || e.metaKey || e.altKey) return;
+          const allowed = ['Backspace','Tab','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Delete','Home','End'];
+          if(allowed.includes(e.key)) return;
+          if(/^\d$/.test(e.key)) return;
+          e.preventDefault();
+        });
+        birthInput.addEventListener('paste', e=>{
+          e.preventDefault();
+          const text = (e.clipboardData || window.clipboardData)?.getData('text') || '';
+          applyBirthdateMask(birthInput, text, text.length);
+          evaluateBirthdate({ showFeedback: false });
+          updateReview();
+          refreshSubmitState();
+        });
+        birthInput.addEventListener('input', e=>{
+          applyBirthdateMask(e.target);
+          evaluateBirthdate({ showFeedback: false });
           updateReview();
           refreshSubmitState();
         });
         birthInput.addEventListener('change', ()=>{
+          applyBirthdateMask(birthInput);
           evaluateBirthdate({ showFeedback: false });
           updateReview();
           refreshSubmitState();
         });
         birthInput.addEventListener('blur', async e=>{
+          applyBirthdateMask(e.target);
           const result = evaluateBirthdate({ showFeedback: true });
           updateReview();
           refreshSubmitState();
@@ -2064,6 +2154,7 @@
         const nascEl = $('#dataNascimento');
         if(nascEl){
           updateBirthdateFeedback(BIRTHDATE_INVALID_MESSAGE);
+          applyBirthdateMask(nascEl);
           evaluateBirthdate({ showFeedback: false });
         }
         updateReview();
