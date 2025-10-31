@@ -1886,17 +1886,46 @@
             campo: cfg.field,
             fileName: name,
             fileExtension: extension ? extension.toLowerCase() : '',
-            base64
+            mimeType: file.type || '',
+            base64: base64 ? `${file.type ? `data:${file.type};base64,` : 'data:;base64,'}${base64}` : ''
           });
         }
         return anexos;
       }
 
-      async function submitAll(){
-        const state = refreshSubmitState();
+      function getNascimentoDisplay(){
+        const input = $('#nascimento');
+        if(!input) return '';
+        const value = (input.value || '').trim();
+        const parsed = parseDateValue(value);
+        if(parsed.valid){
+          return parsed.display;
+        }
+        const isoStored = input.dataset ? input.dataset.iso : '';
+        if(isoStored){
+          return fmtDateBR(isoStored);
+        }
+        return value;
+      }
+
+      function pruneOptionalFields(payload){
+        const optionalKeys = [
+          'segmento','segmento_label','produto_outro','nome_social','rg','num_carteira',
+          'instagram','cnpj','fantasia','assoc_descricao','organizador','como_soube'
+        ];
+        optionalKeys.forEach(key => {
+          if(!(key in payload)) return;
+          const val = payload[key];
+          if(typeof val === 'string' && !val.trim()){
+            delete payload[key];
+          }
+        });
+        return payload;
+      }
+
+      async function submitAll(existingState){
+        const state = existingState || refreshSubmitState();
         if(!state.allOk){
-          $('#finalStatus').innerHTML = `<span class="badge text-bg-warning">Revise os campos destacados</span>`;
-          await showAlertMissingFields(state.issues, state.focusElement);
           return;
         }
         try{
@@ -1909,7 +1938,12 @@
           const generoOption = generoSelect ? generoSelect.selectedOptions[0] : null;
           const racaSelect = document.getElementById('raca');
           const racaOption = racaSelect ? racaSelect.selectedOptions[0] : null;
+          const produtoSelect = document.getElementById('produto');
+          const produtoOption = produtoSelect ? produtoSelect.selectedOptions[0] : null;
           const produtoFinal = $('#produto').value==='OUTROS' ? $('#produtoOutro').value : $('#produto').value;
+          const nascimentoIso = getNascimentoISO();
+          const nascimentoDisplay = getNascimentoDisplay();
+          const anexos = await buildAttachments();
 
           const payload = {
             tipo_inscricao: document.querySelector('input[name=tipoInscricao]:checked').value,
@@ -1919,6 +1953,7 @@
             segmento: segmentoSelect && !segmentoSelect.disabled ? segmentoSelect.value : '',
             segmento_label: segmentoOption ? segmentoOption.textContent.trim() : '',
             produto: produtoFinal,
+            produto_label: produtoOption ? produtoOption.textContent.trim() : '',
             produto_outro: $('#produtoOutro').value.trim(),
             cpf: onlyDigits($('#cpf').value),
             nome: $('#nome').value.trim(),
@@ -1930,7 +1965,8 @@
             autodeclaracao_cor_label: racaOption ? racaOption.textContent.trim() : '',
             mae: $('#mae').value.trim(),
             pai: $('#pai').value.trim(),
-            nascimento: getNascimentoISO(),
+            nascimento: nascimentoDisplay,
+            nascimento_iso: nascimentoIso,
             email: $('#email').value.toLowerCase(),
             celular: onlyDigits($('#celular').value),
             cep: onlyDigits($('#cep').value),
@@ -1959,24 +1995,41 @@
             como_soube: $('#comoSoube').value,
             termo_responsabilidade: document.getElementById('termoResponsabilidade')?.checked ? 'ACEITO' : 'NAO',
             autodeclaracao_racial: racialCheckbox && racialCheckbox.checked ? 'ACEITO' : 'NAO',
-            autodeclaracao_racial_texto: (racialDeclarationBox?.innerText || '').trim()
+            autodeclaracao_racial_texto: (racialDeclarationBox?.innerText || '').trim(),
+            anexos,
+            enviado_em: new Date().toISOString()
           };
 
-          payload.anexos = await buildAttachments();
+          if(payload.produto !== 'OUTROS'){
+            delete payload.produto_outro;
+          }
+          if(!payload.segmento){
+            delete payload.segmento;
+            delete payload.segmento_label;
+          }
+
+          pruneOptionalFields(payload);
 
           const res = await fetch(FINAL_ENDPOINT, {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json'
+              'Content-Type': 'application/json; charset=utf-8',
+              'Accept': 'application/json'
             },
             body: JSON.stringify(payload)
           });
-          const text = await res.text();
+          const responseText = await res.text();
+          let responseData = null;
+          try{ responseData = responseText ? JSON.parse(responseText) : null; }
+          catch(e){ responseData = null; }
           if(res.ok){
             await showMessage('Dados enviados com sucesso!');
             document.getElementById('app').innerHTML = `<div class="py-5 text-center"><h3 class="mb-3">Inscrição recebida</h3><p class="text-muted">Você receberá atualizações pelos canais informados.</p></div>`;
           }else{
-            $('#finalStatus').innerHTML = `<span class="badge text-bg-danger">Falha no envio</span>`; $('#finalOut').textContent=text; $('#finalOut').classList.remove('d-none');
+            const detail = responseData && (responseData.message || responseData.messsage || responseData.error || responseText);
+            $('#finalStatus').innerHTML = `<span class="badge text-bg-danger">Falha no envio</span>`;
+            $('#finalOut').textContent = detail || responseText || '';
+            $('#finalOut').classList.remove('d-none');
             await showMessage('Não foi possível enviar os dados neste momento. Tente novamente em instantes.');
           }
         }catch(e){
@@ -1984,7 +2037,18 @@
           await showMessage('Ocorreu um problema de conexão. Verifique a internet e tente novamente.');
         }
       }
-      document.getElementById('btnSubmitAll').addEventListener('click', submitAll);
+      document.getElementById('btnSubmitAll').addEventListener('click', async (event)=>{
+        const btn = event.currentTarget;
+        const state = refreshSubmitState();
+        const disabledState = btn.getAttribute('aria-disabled') === 'true';
+        if(disabledState || !state.allOk){
+          event.preventDefault();
+          $('#finalStatus').innerHTML = `<span class="badge text-bg-warning">Revise os campos destacados</span>`;
+          await showAlertMissingFields(state.issues, state.focusElement);
+          return;
+        }
+        await submitAll(state);
+      });
 
       // Init --------------------------------------------------------------
       function init(){
