@@ -753,6 +753,11 @@
       const fmtCPF = v => { const d = onlyDigits(v||''); return d.length===11 ? d.replace(/(\\d{3})(\\d{3})(\\d{3})(\\d{2})/,'$1.$2.$3-$4') : (d||''); };
       const fmtCEP = v => { const d = onlyDigits(v||''); return d.length===8 ? d.replace(/(\\d{5})(\\d{3})/,'$1-$2') : (d||''); };
       const DATE_INPUT_REGEX = /^(\\d{2})\/(\\d{2})\/(\\d{4})$/;
+      const isLeapYear = (year) => {
+        const y = Number(year);
+        if(!Number.isFinite(y)) return false;
+        return (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0);
+      };
       function formatDateInputValue(value){
         const digits = onlyDigits(value).slice(0, 8);
         if(digits.length <= 2){
@@ -771,10 +776,10 @@
       function parseDateValue(value){
         const str = String(value || '').trim();
         if(!str){
-          return { valid:false, iso:'', display:'', year:'', month:'', day:'' };
+          return { valid:false, iso:'', display:'', year:'', month:'', day:'', reason:'empty' };
         }
         let year='', month='', day='';
-        if(/^\\d{4}-\\d{2}-\\d{2}$/.test(str)){
+        if(/^\d{4}-\d{2}-\d{2}$/.test(str)){
           [year, month, day] = str.split('-');
         }else if(DATE_INPUT_REGEX.test(str)){
           const match = str.match(DATE_INPUT_REGEX);
@@ -788,23 +793,38 @@
             month = digits.slice(2,4);
             year = digits.slice(4,8);
           }else{
-            return { valid:false, iso:'', display:str, year:'', month:'', day:'' };
+            return { valid:false, iso:'', display:str, year:'', month:'', day:'', reason:'format' };
           }
         }
         if(year.length !== 4 || month.length !== 2 || day.length !== 2){
-          return { valid:false, iso:'', display:str, year, month, day };
+          return { valid:false, iso:'', display:str, year, month, day, reason:'format' };
         }
-        const iso = `${year}-${month}-${day}`;
-        const date = new Date(`${iso}T00:00:00`);
-        const valid = !Number.isNaN(date.getTime()) && date.getFullYear() === Number(year) && (date.getMonth() + 1) === Number(month) && date.getDate() === Number(day);
-        const display = `${day.padStart(2,'0')}/${month.padStart(2,'0')}/${year}`;
+        const normalizedDay = day.padStart(2,'0');
+        const normalizedMonth = month.padStart(2,'0');
+        const normalizedYear = year.padStart(4,'0');
+        const display = `${normalizedDay}/${normalizedMonth}/${normalizedYear}`;
+        const y = Number(normalizedYear);
+        const m = Number(normalizedMonth);
+        const d = Number(normalizedDay);
+        if(!Number.isInteger(y) || !Number.isInteger(m) || !Number.isInteger(d)){
+          return { valid:false, iso:'', display, year: normalizedYear, month: normalizedMonth, day: normalizedDay, reason:'format' };
+        }
+        if(m < 1 || m > 12){
+          return { valid:false, iso:'', display, year: normalizedYear, month: normalizedMonth, day: normalizedDay, reason:'range' };
+        }
+        const monthDays = [31, isLeapYear(y) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+        const maxDay = monthDays[m - 1] || 31;
+        if(d < 1 || d > maxDay){
+          return { valid:false, iso:'', display, year: normalizedYear, month: normalizedMonth, day: normalizedDay, reason:'range' };
+        }
+        const iso = `${normalizedYear}-${normalizedMonth}-${normalizedDay}`;
         return {
-          valid,
-          iso: valid ? iso : '',
-          display: valid ? display : str,
-          year,
-          month,
-          day
+          valid:true,
+          iso,
+          display,
+          year: normalizedYear,
+          month: normalizedMonth,
+          day: normalizedDay
         };
       }
       const fmtDateBR = (value) => {
@@ -1170,30 +1190,35 @@
           updateReview();
           refreshSubmitState();
         });
-        nascimentoInput.addEventListener('blur', async e=>{
-          const value = e.target.value.trim();
-          if(!value){
-            e.target.dataset.iso = '';
-            updateReview();
-            refreshSubmitState();
-            return;
-          }
-          const parsed = parseDateValue(value);
-          if(!parsed.valid){
-            await showMessage('Informe a data de nascimento no formato DD/MM/AAAA.');
-            e.target.value = '';
-            e.target.dataset.iso = '';
-            setFieldInvalid(e.target, true);
-            updateReview();
-            refreshSubmitState();
-            e.target.focus();
-            return;
-          }
-          e.target.value = parsed.display;
-          e.target.dataset.iso = parsed.iso;
-          if(!isAdult(parsed)){
-            await showMessage('A inscrição é permitida apenas para pessoas com 18 anos ou mais.');
-            e.target.value = '';
+          nascimentoInput.addEventListener('blur', async e=>{
+            const value = e.target.value.trim();
+            if(!value){
+              e.target.dataset.iso = '';
+              updateReview();
+              refreshSubmitState();
+              return;
+            }
+            const parsed = parseDateValue(value);
+            if(!parsed.valid){
+              const message = parsed.reason === 'range'
+                ? 'Informe uma data de nascimento válida no formato DD/MM/AAAA.'
+                : 'Informe a data de nascimento no formato DD/MM/AAAA.';
+              e.target.setCustomValidity(message);
+              await showMessage(message);
+              e.target.value = '';
+              e.target.dataset.iso = '';
+              setFieldInvalid(e.target, true);
+              updateReview();
+              refreshSubmitState();
+              e.target.focus();
+              return;
+            }
+            e.target.value = parsed.display;
+            e.target.dataset.iso = parsed.iso;
+            e.target.setCustomValidity('');
+            if(!isAdult(parsed)){
+              await showMessage('A inscrição é permitida apenas para pessoas com 18 anos ou mais.');
+              e.target.value = '';
             e.target.dataset.iso = '';
             setFieldInvalid(e.target, true);
             updateReview();
@@ -1735,9 +1760,15 @@
             }
           }else{
             nascimentoEl.dataset.iso = '';
-            nascimentoEl.setCustomValidity('Informe a data no formato DD/MM/AAAA.');
+            const formatMessage = parsedNascimento.reason === 'range'
+              ? 'Informe uma data válida no formato DD/MM/AAAA.'
+              : 'Informe a data no formato DD/MM/AAAA.';
+            nascimentoEl.setCustomValidity(formatMessage);
             setFieldInvalid(nascimentoEl, true);
-            invalidFields.push({ selector: '#nascimento', message: 'Data de nascimento: informe no formato DD/MM/AAAA.', element: nascimentoEl });
+            const alertMessage = parsedNascimento.reason === 'range'
+              ? 'Data de nascimento: informe uma data válida no formato DD/MM/AAAA.'
+              : 'Data de nascimento: informe no formato DD/MM/AAAA.';
+            invalidFields.push({ selector: '#nascimento', message: alertMessage, element: nascimentoEl });
           }
         }else{
           nascimentoEl.dataset.iso = '';
