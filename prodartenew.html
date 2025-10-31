@@ -211,7 +211,7 @@
             </div>
             <div class="col-md-6">
               <label class="form-label required" for="nascimento">Data de nascimento</label>
-              <input type="date" class="form-control" id="nascimento" required>
+              <input type="text" inputmode="numeric" pattern="[0-9/]*" maxlength="10" class="form-control" id="nascimento" placeholder="DD/MM/AAAA" required>
             </div>
           </div>
           <div class="row g-3 mt-0">
@@ -748,21 +748,84 @@
       const esc = s => { const d=document.createElement('div'); d.innerText=s??''; return d.innerHTML||''; };
       const fmtCPF = v => { const d = onlyDigits(v||''); return d.length===11 ? d.replace(/(\\d{3})(\\d{3})(\\d{3})(\\d{2})/,'$1.$2.$3-$4') : (d||''); };
       const fmtCEP = v => { const d = onlyDigits(v||''); return d.length===8 ? d.replace(/(\\d{5})(\\d{3})/,'$1-$2') : (d||''); };
-      const fmtDateBR = (value) => {
-        if(!value) return '';
-        const parts = String(value).split('-');
-        if(parts.length === 3){
-          const [y,m,d] = parts;
-          if(y && m && d){
-            return `${d.padStart(2,'0')}/${m.padStart(2,'0')}/${y}`;
+      const DATE_INPUT_REGEX = /^(\\d{2})\/(\\d{2})\/(\\d{4})$/;
+      function formatDateInputValue(value){
+        const digits = onlyDigits(value).slice(0,8);
+        if(digits.length <= 2){
+          return digits;
+        }
+        if(digits.length <= 4){
+          return `${digits.slice(0,2)}/${digits.slice(2)}`;
+        }
+        return `${digits.slice(0,2)}/${digits.slice(2,4)}/${digits.slice(4)}`;
+      }
+      function parseDateValue(value){
+        const str = String(value || '').trim();
+        if(!str){
+          return { valid:false, iso:'', display:'', year:'', month:'', day:'' };
+        }
+        let year='', month='', day='';
+        if(/^\\d{4}-\\d{2}-\\d{2}$/.test(str)){
+          [year, month, day] = str.split('-');
+        }else if(DATE_INPUT_REGEX.test(str)){
+          const match = str.match(DATE_INPUT_REGEX);
+          day = match[1];
+          month = match[2];
+          year = match[3];
+        }else{
+          const digits = onlyDigits(str);
+          if(digits.length === 8){
+            day = digits.slice(0,2);
+            month = digits.slice(2,4);
+            year = digits.slice(4,8);
+          }else{
+            return { valid:false, iso:'', display:str, year:'', month:'', day:'' };
           }
         }
+        if(year.length !== 4 || month.length !== 2 || day.length !== 2){
+          return { valid:false, iso:'', display:str, year, month, day };
+        }
+        const iso = `${year}-${month}-${day}`;
+        const date = new Date(`${iso}T00:00:00`);
+        const valid = !Number.isNaN(date.getTime()) && date.getFullYear() === Number(year) && (date.getMonth() + 1) === Number(month) && date.getDate() === Number(day);
+        const display = `${day.padStart(2,'0')}/${month.padStart(2,'0')}/${year}`;
+        return {
+          valid,
+          iso: valid ? iso : '',
+          display: valid ? display : str,
+          year,
+          month,
+          day
+        };
+      }
+      const fmtDateBR = (value) => {
+        const parsed = parseDateValue(value);
+        if(parsed.valid){
+          return parsed.display;
+        }
+        if(!value) return '';
         const dt = new Date(value);
         if(!Number.isNaN(dt.getTime())){
           return new Intl.DateTimeFormat('pt-BR').format(dt);
         }
-        return value || '';
+        return String(value) || '';
       };
+
+      function getNascimentoISO(){
+        const input = $('#nascimento');
+        if(!input) return '';
+        const stored = input.dataset ? input.dataset.iso : '';
+        if(stored){
+          return stored;
+        }
+        const parsed = parseDateValue(input.value);
+        if(parsed.valid){
+          input.dataset.iso = parsed.iso;
+          return parsed.iso;
+        }
+        input.dataset.iso = '';
+        return '';
+      }
 
       const FIELD_LABELS = {
         '#tipoCadastro': 'Tipo de cadastro',
@@ -857,12 +920,12 @@
         if(!value) return false;
         return normalize(value) === 'RECIFE';
       }
-      function isAdult(dateStr){
-        if(!dateStr) return false;
-        const parts = String(dateStr).split('-');
-        if(parts.length !== 3) return false;
-        const [y,m,d] = parts.map(Number);
-        if(!y || !m || !d) return false;
+      function isAdult(dateValue){
+        const parsed = typeof dateValue === 'string' ? parseDateValue(dateValue) : dateValue;
+        if(!parsed || !parsed.valid){
+          return false;
+        }
+        const [y,m,d] = parsed.iso.split('-').map(Number);
         const birth = new Date(y, m - 1, d);
         if(Number.isNaN(birth.getTime())) return false;
         const today = new Date();
@@ -1080,16 +1143,60 @@
 
       $('#cidade').addEventListener('blur', enforceRecife);
       $('#cidade').addEventListener('change', enforceRecife);
-      $('#nascimento').addEventListener('change', async e=>{
-        const value = e.target.value;
-        if(value && !isAdult(value)){
-          await showMessage('A inscrição é permitida apenas para pessoas com 18 anos ou mais.');
-          e.target.value = '';
-          e.target.focus();
-        }
-        updateReview();
-        refreshSubmitState();
-      });
+      const nascimentoInput = $('#nascimento');
+      if(nascimentoInput){
+        nascimentoInput.addEventListener('input', e=>{
+          const formatted = formatDateInputValue(e.target.value);
+          if(e.target.value !== formatted){
+            e.target.value = formatted;
+          }
+          const parsed = parseDateValue(formatted);
+          if(parsed.valid){
+            e.target.dataset.iso = parsed.iso;
+            e.target.setCustomValidity('');
+            setFieldInvalid(e.target, false);
+          }else{
+            e.target.dataset.iso = '';
+          }
+          updateReview();
+          refreshSubmitState();
+        });
+        nascimentoInput.addEventListener('blur', async e=>{
+          const value = e.target.value.trim();
+          if(!value){
+            e.target.dataset.iso = '';
+            updateReview();
+            refreshSubmitState();
+            return;
+          }
+          const parsed = parseDateValue(value);
+          if(!parsed.valid){
+            await showMessage('Informe a data de nascimento no formato DD/MM/AAAA.');
+            e.target.value = '';
+            e.target.dataset.iso = '';
+            setFieldInvalid(e.target, true);
+            updateReview();
+            refreshSubmitState();
+            e.target.focus();
+            return;
+          }
+          e.target.value = parsed.display;
+          e.target.dataset.iso = parsed.iso;
+          if(!isAdult(parsed)){
+            await showMessage('A inscrição é permitida apenas para pessoas com 18 anos ou mais.');
+            e.target.value = '';
+            e.target.dataset.iso = '';
+            setFieldInvalid(e.target, true);
+            updateReview();
+            refreshSubmitState();
+            e.target.focus();
+            return;
+          }
+          setFieldInvalid(e.target, false);
+          updateReview();
+          refreshSubmitState();
+        });
+      }
 
       // Produtos (carregar e filtrar) ------------------------------------
       function populateProductsFromResponse(baseList, segmentoFiltro=''){
@@ -1392,7 +1499,8 @@
         const genero = generoSelect && generoSelect.value ? esc(generoSelect.selectedOptions[0]?.textContent || '') : '';
         const racaSelect = document.getElementById('raca');
         const raca = racaSelect && racaSelect.value ? esc(racaSelect.selectedOptions[0]?.textContent || '') : '';
-        const nascimentoFmt = fmtDateBR($('#nascimento').value);
+        const nascimentoIso = getNascimentoISO();
+        const nascimentoFmt = fmtDateBR(nascimentoIso || $('#nascimento').value);
         const enderecoPartes = [];
         if(cep) enderecoPartes.push(cep);
         const logNumero = [log, num].filter(Boolean).join(', ');
@@ -1604,16 +1712,26 @@
         }
 
         const nascimentoEl = $('#nascimento');
-        const nascimentoVal = nascimentoEl.value;
+        const nascimentoVal = nascimentoEl.value.trim();
         let nascimentoOk = false;
-        if(nascimentoVal && nascimentoVal.length === 10){
-          nascimentoOk = isAdult(nascimentoVal);
-          nascimentoEl.setCustomValidity(nascimentoOk ? '' : 'É necessário ser maior de 18 anos.');
-          setFieldInvalid(nascimentoEl, !nascimentoOk);
-          if(!nascimentoOk){
-            invalidFields.push({ selector: '#nascimento', message: 'Data de nascimento: permitido apenas para maiores de 18 anos.', element: nascimentoEl });
+        if(nascimentoVal){
+          const parsedNascimento = parseDateValue(nascimentoVal);
+          if(parsedNascimento.valid){
+            nascimentoEl.dataset.iso = parsedNascimento.iso;
+            nascimentoOk = isAdult(parsedNascimento);
+            nascimentoEl.setCustomValidity(nascimentoOk ? '' : 'É necessário ser maior de 18 anos.');
+            setFieldInvalid(nascimentoEl, !nascimentoOk);
+            if(!nascimentoOk){
+              invalidFields.push({ selector: '#nascimento', message: 'Data de nascimento: permitido apenas para maiores de 18 anos.', element: nascimentoEl });
+            }
+          }else{
+            nascimentoEl.dataset.iso = '';
+            nascimentoEl.setCustomValidity('Informe a data no formato DD/MM/AAAA.');
+            setFieldInvalid(nascimentoEl, true);
+            invalidFields.push({ selector: '#nascimento', message: 'Data de nascimento: informe no formato DD/MM/AAAA.', element: nascimentoEl });
           }
         }else{
+          nascimentoEl.dataset.iso = '';
           nascimentoEl.setCustomValidity('');
         }
 
@@ -1812,7 +1930,7 @@
             autodeclaracao_cor_label: racaOption ? racaOption.textContent.trim() : '',
             mae: $('#mae').value.trim(),
             pai: $('#pai').value.trim(),
-            nascimento: $('#nascimento').value,
+            nascimento: getNascimentoISO(),
             email: $('#email').value.toLowerCase(),
             celular: onlyDigits($('#celular').value),
             cep: onlyDigits($('#cep').value),
@@ -1883,6 +2001,17 @@
           const sanitizedNumero = sanitizeNumeroValue(numeroEl.value);
           numeroEl.value = sanitizedNumero;
           numeroEl.setCustomValidity(numeroIsValid(sanitizedNumero) ? '' : 'Informe o número ou S/N.');
+        }
+        const nascEl = $('#nascimento');
+        if(nascEl){
+          const parsed = parseDateValue(nascEl.value);
+          if(parsed.valid){
+            nascEl.value = parsed.display;
+            nascEl.dataset.iso = parsed.iso;
+          }else if(nascEl.value){
+            nascEl.value = formatDateInputValue(nascEl.value);
+            nascEl.dataset.iso = '';
+          }
         }
         updateReview();
         refreshSubmitState();
