@@ -754,7 +754,19 @@
       const fmtCEP = v => { const d = onlyDigits(v||''); return d.length===8 ? d.replace(/(\\d{5})(\\d{3})/,'$1-$2') : (d||''); };
       const DATE_INPUT_REGEX = /^(\\d{2})\/(\\d{2})\/(\\d{4})$/;
       function formatDateInputValue(value){
-        return onlyDigits(value).slice(0, 8);
+        const digits = onlyDigits(value).slice(0, 8);
+        if(digits.length <= 2){
+          return digits;
+        }
+        if(digits.length <= 4){
+          const day = digits.slice(0, 2);
+          const month = digits.slice(2);
+          return `${day}/${month}`;
+        }
+        const day = digits.slice(0, 2);
+        const month = digits.slice(2, 4);
+        const year = digits.slice(4);
+        return `${day}/${month}/${year}`;
       }
       function parseDateValue(value){
         const str = String(value || '').trim();
