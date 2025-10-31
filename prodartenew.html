@@ -62,6 +62,10 @@
         box-shadow:0 0 0 .25rem rgba(13,110,253,.2);
         border-color:#0b2447;
       }
+      .form-check-input.field-invalid{
+        border-color:#dc3545 !important;
+        box-shadow:0 0 0 .2rem rgba(220,53,69,.25) !important;
+      }
       .declaration-actions .btn{ min-width:140px; }
       .field-invalid{ border-color:#dc3545 !important; box-shadow:0 0 0 .2rem rgba(220,53,69,.15) !important; }
       .review-table td{ vertical-align: top; }
@@ -95,6 +99,10 @@
         padding:1.75rem 1.5rem;
       }
       .message-dialog h5{ font-weight:700; color:#0b2447; }
+      #alertModal .modal-title span:last-child{ color:#dc3545; }
+      #btnSubmitAll[aria-disabled="true"]{
+        opacity:.6;
+      }
       @media (max-width: 992px){
         :root{ --stage-w:100vw; --pattern-w:100vw; }
         .stage, .pattern-strip{ left:0; }
@@ -399,25 +407,25 @@
             <div class="col-12">
               <label class="form-label required">Documento Oficial (Frente)</label>
               <div class="dropzone">
-                <input class="form-control" type="file" id="docFrente" accept="image/*,application/pdf" capture="environment">
+                <input class="form-control" type="file" id="docFrente" accept="image/*,application/pdf">
               </div>
             </div>
             <div class="col-12">
               <label class="form-label required">Documento Oficial (Verso)</label>
               <div class="dropzone">
-                <input class="form-control" type="file" id="docVerso" accept="image/*,application/pdf" capture="environment">
+                <input class="form-control" type="file" id="docVerso" accept="image/*,application/pdf">
               </div>
             </div>
             <div class="col-12">
               <label class="form-label required">Comprovante de residência</label>
               <div class="dropzone">
-                <input class="form-control" type="file" id="compDomicilio" accept="image/*,application/pdf" capture="environment">
+                <input class="form-control" type="file" id="compDomicilio" accept="image/*,application/pdf">
               </div>
             </div>
             <div class="col-12">
               <label class="form-label" id="certLabel">Certificado do MEI OU CNPJ</label>
               <div class="dropzone">
-                <input class="form-control" type="file" id="certMeiCnpj" accept="image/*,application/pdf" capture="environment">
+                <input class="form-control" type="file" id="certMeiCnpj" accept="image/*,application/pdf">
               </div>
               <div class="help" id="certHelp">Obrigatório quando possuir MEI ou CNPJ informado.</div>
             </div>
@@ -427,19 +435,19 @@
           <div class="row g-3">
             <div class="col-12">
               <label class="form-label required">Foto 1</label>
-              <div class="dropzone"><input class="form-control" type="file" id="foto1" accept="image/*" capture="environment"></div>
+              <div class="dropzone"><input class="form-control" type="file" id="foto1" accept="image/*"></div>
             </div>
             <div class="col-12">
               <label class="form-label required">Foto 2</label>
-              <div class="dropzone"><input class="form-control" type="file" id="foto2" accept="image/*" capture="environment"></div>
+              <div class="dropzone"><input class="form-control" type="file" id="foto2" accept="image/*"></div>
             </div>
             <div class="col-12">
               <label class="form-label">Foto 3</label>
-              <div class="dropzone"><input class="form-control" type="file" id="foto3" accept="image/*" capture="environment"></div>
+              <div class="dropzone"><input class="form-control" type="file" id="foto3" accept="image/*"></div>
             </div>
             <div class="col-12">
               <label class="form-label">Foto 4</label>
-              <div class="dropzone"><input class="form-control" type="file" id="foto4" accept="image/*" capture="environment"></div>
+              <div class="dropzone"><input class="form-control" type="file" id="foto4" accept="image/*"></div>
             </div>
           </div>
         </div>
@@ -579,7 +587,7 @@
           </div>
 
           <div class="d-flex gap-2">
-            <button type="button" class="btn btn-secondary" id="btnSubmitAll" disabled>Enviar dados</button>
+            <button type="button" class="btn btn-secondary" id="btnSubmitAll" aria-disabled="true">Enviar dados</button>
             <div id="finalStatus" class="ms-2"></div>
           </div>
           <pre class="json mt-3 d-none" id="finalOut"></pre>
@@ -608,12 +616,29 @@
       </div>
     </div>
 
-    <div class="message-overlay" id="messageFallback" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal fade" id="alertModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header border-0">
+            <h5 class="modal-title text-danger fw-bold d-flex align-items-center gap-2"><span aria-hidden="true">⚠️</span><span>Alerta</span></h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+          </div>
+          <div class="modal-body">
+            <div id="alertModalBody"></div>
+          </div>
+          <div class="modal-footer border-0">
+            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Entendi</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="message-overlay" id="dialogFallback" role="dialog" aria-modal="true" aria-hidden="true">
       <div class="message-dialog">
-        <h5 class="mb-3">Mensagem</h5>
-        <p class="mb-4" id="messageFallbackBody"></p>
+        <h5 class="mb-3" id="dialogFallbackTitle">Mensagem</h5>
+        <div class="mb-4" id="dialogFallbackBody"></div>
         <div class="text-end">
-          <button type="button" class="btn btn-primary" id="messageFallbackClose">OK</button>
+          <button type="button" class="btn btn-primary" id="dialogFallbackClose">OK</button>
         </div>
       </div>
     </div>
@@ -625,9 +650,55 @@
       const messageModalEl = document.getElementById('messageModal');
       const messageModalBody = document.getElementById('messageModalBody');
       const messageModal = (window.bootstrap && messageModalEl) ? new window.bootstrap.Modal(messageModalEl) : null;
-      const fallbackOverlay = document.getElementById('messageFallback');
-      const fallbackBody = document.getElementById('messageFallbackBody');
-      const fallbackClose = document.getElementById('messageFallbackClose');
+      const alertModalEl = document.getElementById('alertModal');
+      const alertModalBody = document.getElementById('alertModalBody');
+      const alertModal = (window.bootstrap && alertModalEl) ? new window.bootstrap.Modal(alertModalEl) : null;
+      const fallbackOverlay = document.getElementById('dialogFallback');
+      const fallbackTitle = document.getElementById('dialogFallbackTitle');
+      const fallbackBody = document.getElementById('dialogFallbackBody');
+      const fallbackClose = document.getElementById('dialogFallbackClose');
+
+      function openFallbackDialog({ title, bodyHtml, focusAfter, variant = 'default' }){
+        if(!(fallbackOverlay && fallbackBody && fallbackClose && fallbackTitle)){
+          console.warn('Nenhum fallback de diálogo disponível.');
+          return Promise.resolve();
+        }
+        fallbackTitle.textContent = title;
+        fallbackTitle.classList.toggle('text-danger', variant === 'danger');
+        fallbackBody.innerHTML = bodyHtml;
+        fallbackOverlay.classList.add('show');
+        fallbackOverlay.setAttribute('aria-hidden','false');
+        try{ fallbackClose.focus({ preventScroll: true }); }
+        catch(e){ fallbackClose.focus(); }
+        return new Promise(resolve => {
+          const close = () => {
+            fallbackOverlay.classList.remove('show');
+            fallbackOverlay.setAttribute('aria-hidden','true');
+            fallbackClose.removeEventListener('click', close);
+            fallbackOverlay.removeEventListener('click', overlayHandler);
+            document.removeEventListener('keydown', escHandler);
+            if(focusAfter && typeof focusAfter.focus === 'function'){
+              focusAfter.focus();
+            }
+            resolve();
+          };
+          const overlayHandler = (event) => {
+            if(event.target === fallbackOverlay){
+              event.preventDefault();
+              close();
+            }
+          };
+          const escHandler = (event) => {
+            if(event.key === 'Escape'){
+              event.preventDefault();
+              close();
+            }
+          };
+          fallbackClose.addEventListener('click', close, { once: true });
+          fallbackOverlay.addEventListener('click', overlayHandler);
+          document.addEventListener('keydown', escHandler, { once: true });
+        });
+      }
 
       function showMessage(text){
         if(messageModal && messageModalBody){
@@ -640,36 +711,34 @@
             messageModal.show();
           });
         }
-        if(fallbackOverlay && fallbackBody && fallbackClose){
-          fallbackBody.textContent = text;
-          fallbackOverlay.classList.add('show');
-          fallbackOverlay.setAttribute('aria-hidden','false');
-          try{ fallbackClose.focus({ preventScroll: true }); }
-          catch(e){ fallbackClose.focus(); }
+        const safeBody = `<p class="mb-0">${esc(text)}</p>`;
+        return openFallbackDialog({ title: 'Mensagem', bodyHtml: safeBody, variant: 'default' });
+      }
+
+      function renderIssueList(issues){
+        if(!Array.isArray(issues) || issues.length === 0){
+          return '<p class="mb-0">Preencha os campos obrigatórios antes de enviar.</p>';
+        }
+        const items = issues.map(item => `<li>${esc(item.message)}</li>`).join('');
+        return `<p class="mb-2 text-muted">Verifique os campos abaixo:</p><ul class="mb-0 ps-3">${items}</ul>`;
+      }
+
+      function showAlertMissingFields(issues, focusAfter){
+        const bodyHtml = renderIssueList(issues);
+        if(alertModal && alertModalBody){
+          alertModalBody.innerHTML = bodyHtml;
           return new Promise(resolve => {
-            const close = () => {
-              fallbackOverlay.classList.remove('show');
-              fallbackOverlay.setAttribute('aria-hidden','true');
-              fallbackClose.removeEventListener('click', close);
-              fallbackOverlay.removeEventListener('click', overlayHandler);
-              document.removeEventListener('keydown', escHandler);
-              resolve();
-            };
-            const overlayHandler = (event) => {
-              if(event.target === fallbackOverlay){
-                close();
+            alertModalEl.addEventListener('hidden.bs.modal', function handler(){
+              alertModalEl.removeEventListener('hidden.bs.modal', handler);
+              if(focusAfter && typeof focusAfter.focus === 'function'){
+                focusAfter.focus();
               }
-            };
-            const escHandler = (event) => {
-              if(event.key === 'Escape'){ event.preventDefault(); close(); }
-            };
-            fallbackClose.addEventListener('click', close, { once: true });
-            fallbackOverlay.addEventListener('click', overlayHandler);
-            document.addEventListener('keydown', escHandler, { once: true });
+              resolve();
+            }, { once: true });
+            alertModal.show();
           });
         }
-        console.warn('Nenhum componente de mensagem disponível.');
-        return Promise.resolve();
+        return openFallbackDialog({ title: '⚠️ Alerta', bodyHtml, focusAfter, variant: 'danger' });
       }
 
       // Utils -------------------------------------------------------------
@@ -694,6 +763,48 @@
         }
         return value || '';
       };
+
+      const FIELD_LABELS = {
+        '#tipoCadastro': 'Tipo de cadastro',
+        '#segmento': 'Segmento',
+        '#produto': 'Produto',
+        '#produtoOutro': 'Informe o produto',
+        '#cpf': 'CPF',
+        '#nome': 'Nome completo',
+        '#genero': 'Gênero',
+        '#raca': 'Autodeclaração de cor',
+        '#mae': 'Nome da mãe',
+        '#pai': 'Nome do pai',
+        '#nascimento': 'Data de nascimento',
+        '#email': 'E-mail',
+        '#celular': 'Telefone celular',
+        '#cep': 'CEP',
+        '#logradouro': 'Logradouro',
+        '#numero': 'Número',
+        '#bairro': 'Bairro',
+        '#cidade': 'Cidade',
+        '#uf': 'UF',
+        '#sobreTrabalho': 'Sobre o trabalho',
+        '#tempoAtv': 'Tempo de atividade',
+        '#renda': 'Renda média mensal',
+        '#divulgacao': 'Como ficou sabendo',
+        '#organizador': 'Informe o evento ou organização',
+        '#comoSoube': 'Informe o outro canal',
+        '#assocDesc': 'Descrição da associação',
+        '#docFrente': 'Documento de identidade (frente)',
+        '#docVerso': 'Documento de identidade (verso)',
+        '#compDomicilio': 'Comprovante de residência',
+        '#certMeiCnpj': 'Certificado MEI/CNPJ',
+        '#foto1': 'Foto 1',
+        '#foto2': 'Foto 2',
+        '#foto3': 'Foto 3',
+        '#foto4': 'Foto 4',
+        '#cnpj': 'CNPJ',
+        '#termoResponsabilidade': 'Termo de responsabilidade',
+        '#racialDeclarationAgree': 'Autodeclaração étnico-racial'
+      };
+
+      let validationState = { allOk: false, issues: [], focusElement: null };
 
       function setFieldInvalid(el, invalid){
         if(!el) return;
@@ -1438,6 +1549,8 @@
 
       // Submit state ------------------------------------------------------
       function refreshSubmitState(){
+        const missingFields = [];
+        const invalidFields = [];
         const requiredSelectors = [
           '#tipoCadastro','#segmento','#produto','#cpf','#nome','#genero','#raca','#mae','#nascimento',
           '#email','#celular','#cep','#logradouro','#numero','#bairro','#cidade','#uf',
@@ -1447,8 +1560,8 @@
         requiredSelectors.forEach(sel => {
           const el = $(sel);
           if(!el) return;
-          const hidden = el.closest('.d-none');
-          if(el.disabled || hidden){
+          const hiddenAncestor = el.closest('.d-none');
+          if(el.disabled || hiddenAncestor){
             setFieldInvalid(el, false);
             return;
           }
@@ -1462,65 +1575,142 @@
           }
           if(!ok){
             requiredFilled = false;
+            const label = FIELD_LABELS[sel] || 'Campo obrigatório';
+            const message = el.type === 'file' ? `${label}: selecione um arquivo.` : `${label}: preencha este campo.`;
+            missingFields.push({ selector: sel, message, element: el });
           }
           setFieldInvalid(el, !ok);
         });
 
-        const cpfOk=isValidCPF($('#cpf').value);
-        setFieldInvalid($('#cpf'), !cpfOk);
-        const celOk=isValidCell($('#celular').value);
-        setFieldInvalid($('#celular'), !celOk);
-        const emailOk=isValidEmail($('#email').value);
-        setFieldInvalid($('#email'), !emailOk);
-        const nascimentoVal = $('#nascimento').value;
+        const cpfEl = $('#cpf');
+        const cpfOk = isValidCPF(cpfEl.value);
+        setFieldInvalid(cpfEl, !cpfOk);
+        if(!cpfOk){
+          invalidFields.push({ selector: '#cpf', message: 'CPF inválido: informe um número válido.', element: cpfEl });
+        }
+
+        const cellEl = $('#celular');
+        const celOk = isValidCell(cellEl.value);
+        setFieldInvalid(cellEl, !celOk);
+        if(!celOk){
+          invalidFields.push({ selector: '#celular', message: 'Telefone celular inválido: utilize DDD + número com 11 dígitos.', element: cellEl });
+        }
+
+        const emailEl = $('#email');
+        const emailOk = isValidEmail(emailEl.value);
+        setFieldInvalid(emailEl, !emailOk);
+        if(!emailOk){
+          invalidFields.push({ selector: '#email', message: 'E-mail inválido: verifique o formato informado.', element: emailEl });
+        }
+
+        const nascimentoEl = $('#nascimento');
+        const nascimentoVal = nascimentoEl.value;
         let nascimentoOk = false;
         if(nascimentoVal && nascimentoVal.length === 10){
           nascimentoOk = isAdult(nascimentoVal);
-          $('#nascimento').setCustomValidity(nascimentoOk ? '' : 'É necessário ser maior de 18 anos.');
-          setFieldInvalid($('#nascimento'), !nascimentoOk);
+          nascimentoEl.setCustomValidity(nascimentoOk ? '' : 'É necessário ser maior de 18 anos.');
+          setFieldInvalid(nascimentoEl, !nascimentoOk);
+          if(!nascimentoOk){
+            invalidFields.push({ selector: '#nascimento', message: 'Data de nascimento: permitido apenas para maiores de 18 anos.', element: nascimentoEl });
+          }
         }else{
-          $('#nascimento').setCustomValidity('');
-          setFieldInvalid($('#nascimento'), false);
+          nascimentoEl.setCustomValidity('');
         }
+
         const cnpjIsReq = document.getElementById('meiSim').checked;
-        const cnpjOk = !cnpjIsReq || isValidCNPJ($('#cnpj').value);
+        const cnpjEl = $('#cnpj');
+        const cnpjOk = !cnpjIsReq || isValidCNPJ(cnpjEl.value);
         if(cnpjIsReq){
-          setFieldInvalid($('#cnpj'), !cnpjOk);
+          setFieldInvalid(cnpjEl, !cnpjOk);
+          if(!cnpjOk){
+            invalidFields.push({ selector: '#cnpj', message: 'CNPJ inválido: informe um número válido.', element: cnpjEl });
+          }
         }else{
-          setFieldInvalid($('#cnpj'), false);
+          setFieldInvalid(cnpjEl, false);
         }
-        const certReqOk = !cnpjIsReq || ($('#certMeiCnpj').files||[]).length>0;
+
+        const certInput = $('#certMeiCnpj');
+        const certReqOk = !cnpjIsReq || (certInput.files||[]).length>0;
         if(cnpjIsReq){
-          setFieldInvalid($('#certMeiCnpj'), !certReqOk);
+          setFieldInvalid(certInput, !certReqOk);
+          if(!certReqOk){
+            missingFields.push({ selector: '#certMeiCnpj', message: `${FIELD_LABELS['#certMeiCnpj']}: selecione um arquivo.`, element: certInput });
+          }
         }else{
-          setFieldInvalid($('#certMeiCnpj'), false);
+          setFieldInvalid(certInput, false);
         }
-        // campos condicionais
-        const produtoOutroOk = ($('#produto').value!=='OUTROS') || (!!$('#produtoOutro').value.trim());
-        setFieldInvalid($('#produtoOutro'), !produtoOutroOk && !$('#produtoOutroWrap').classList.contains('d-none'));
-        const divulgOrgOk = ($('#divulgacao').value!=='Evento-Organização') || (!!$('#organizador').value);
-        setFieldInvalid($('#organizador'), !divulgOrgOk && $('#divulgacao').value==='Evento-Organização');
-        const divulgOutroOk = ($('#divulgacao').value!=='OUTRO') || (!!($('#comoSoube').value||'').trim());
-        setFieldInvalid($('#comoSoube'), !divulgOutroOk && $('#divulgacao').value==='OUTRO');
+
+        const produtoOutroEl = $('#produtoOutro');
+        const produtoOutroOk = ($('#produto').value!=='OUTROS') || (!!produtoOutroEl.value.trim());
+        const produtoOutroVisivel = !$('#produtoOutroWrap').classList.contains('d-none');
+        setFieldInvalid(produtoOutroEl, !produtoOutroOk && produtoOutroVisivel);
+        if(!produtoOutroOk && produtoOutroVisivel){
+          missingFields.push({ selector: '#produtoOutro', message: `${FIELD_LABELS['#produtoOutro']}: descreva o produto.`, element: produtoOutroEl });
+        }
+
+        const divulgacaoEl = $('#divulgacao');
+        const divulgOrgOk = (divulgacaoEl.value!=='Evento-Organização') || (!!$('#organizador').value.trim());
+        const organizadorEl = $('#organizador');
+        setFieldInvalid(organizadorEl, !divulgOrgOk && divulgacaoEl.value==='Evento-Organização');
+        if(!divulgOrgOk && divulgacaoEl.value==='Evento-Organização'){
+          missingFields.push({ selector: '#organizador', message: `${FIELD_LABELS['#organizador']}: informe o evento ou organização.`, element: organizadorEl });
+        }
+
+        const divulgOutroOk = (divulgacaoEl.value!=='OUTRO') || (!!($('#comoSoube').value||'').trim());
+        const comoSoubeEl = $('#comoSoube');
+        setFieldInvalid(comoSoubeEl, !divulgOutroOk && divulgacaoEl.value==='OUTRO');
+        if(!divulgOutroOk && divulgacaoEl.value==='OUTRO'){
+          missingFields.push({ selector: '#comoSoube', message: `${FIELD_LABELS['#comoSoube']}: descreva o canal informado.`, element: comoSoubeEl });
+        }
+
         const assocSim = document.getElementById('assocSim').checked;
-        const assocDescOk = !assocSim || (!!($('#assocDesc').value||'').trim());
-        setFieldInvalid($('#assocDesc'), !assocDescOk && assocSim);
-        const cityOk = isRecifeCity($('#cidade').value);
-        setFieldInvalid($('#cidade'), !cityOk && !!$('#cidade').value.trim());
+        const assocDescEl = $('#assocDesc');
+        const assocDescOk = !assocSim || (!!(assocDescEl.value||'').trim());
+        setFieldInvalid(assocDescEl, !assocDescOk && assocSim);
+        if(!assocDescOk && assocSim){
+          missingFields.push({ selector: '#assocDesc', message: `${FIELD_LABELS['#assocDesc']}: detalhe a associação.`, element: assocDescEl });
+        }
+
+        const cidadeEl = $('#cidade');
+        const cityValue = cidadeEl.value;
+        const cityOk = isRecifeCity(cityValue);
+        if(cityValue){
+          setFieldInvalid(cidadeEl, !cityOk);
+          if(!cityOk){
+            invalidFields.push({ selector: '#cidade', message: 'Cidade inválida: o cadastro é exclusivo para Recife.', element: cidadeEl });
+          }
+        }
+
         const termoEl = $('#termoResponsabilidade');
         const racialCheckbox = $('#racialDeclarationAgree');
         const termoOk = termoEl ? termoEl.checked : false;
         const racialOk = racialCheckbox ? racialCheckbox.checked : false;
-        if(termoEl && !termoEl.disabled){
+        if(termoEl){
           setFieldInvalid(termoEl, !termoOk);
+          if(!termoOk){
+            missingFields.push({ selector: '#termoResponsabilidade', message: `${FIELD_LABELS['#termoResponsabilidade']}: marque para confirmar.`, element: termoEl });
+          }
         }
-        if(racialCheckbox && !racialCheckbox.disabled){
+        if(racialCheckbox){
           setFieldInvalid(racialCheckbox, !racialOk);
+          if(!racialOk){
+            missingFields.push({ selector: '#racialDeclarationAgree', message: `${FIELD_LABELS['#racialDeclarationAgree']}: marque o aceite após a leitura.`, element: racialCheckbox });
+          }
         }
 
         const allOk = requiredFilled && cpfOk && celOk && emailOk && nascimentoOk && cnpjOk && certReqOk && produtoOutroOk && divulgOrgOk && divulgOutroOk && assocDescOk && cityOk && termoOk && racialOk;
-        const btn=$('#btnSubmitAll');
-        btn.disabled = !allOk; btn.classList.toggle('btn-success', allOk); btn.classList.toggle('btn-secondary', !allOk);
+        const issues = [...missingFields, ...invalidFields];
+        const focusElement = issues.find(item => item.element)?.element || null;
+        validationState = { allOk, issues, focusElement };
+
+        const btn = $('#btnSubmitAll');
+        if(btn){
+          btn.dataset.ready = allOk ? 'true' : 'false';
+          btn.setAttribute('aria-disabled', allOk ? 'false' : 'true');
+          btn.classList.toggle('btn-success', allOk);
+          btn.classList.toggle('btn-secondary', !allOk);
+        }
+        return validationState;
       }
 
       // Files/inputs listeners for submit state + review
@@ -1585,6 +1775,12 @@
       }
 
       async function submitAll(){
+        const state = refreshSubmitState();
+        if(!state.allOk){
+          $('#finalStatus').innerHTML = `<span class="badge text-bg-warning">Revise os campos destacados</span>`;
+          await showAlertMissingFields(state.issues, state.focusElement);
+          return;
+        }
         try{
           $('#finalStatus').innerHTML = `<span class="badge text-bg-secondary">Enviando...</span>`;
           const tipoSelect = document.getElementById('tipoCadastro');
@@ -1663,8 +1859,12 @@
             document.getElementById('app').innerHTML = `<div class="py-5 text-center"><h3 class="mb-3">Inscrição recebida</h3><p class="text-muted">Você receberá atualizações pelos canais informados.</p></div>`;
           }else{
             $('#finalStatus').innerHTML = `<span class="badge text-bg-danger">Falha no envio</span>`; $('#finalOut').textContent=text; $('#finalOut').classList.remove('d-none');
+            await showMessage('Não foi possível enviar os dados neste momento. Tente novamente em instantes.');
           }
-        }catch(e){ $('#finalStatus').innerHTML = `<span class="badge text-bg-danger">Erro de rede</span>`; $('#finalOut').textContent=String(e); $('#finalOut').classList.remove('d-none'); }
+        }catch(e){
+          $('#finalStatus').innerHTML = `<span class="badge text-bg-danger">Erro de rede</span>`; $('#finalOut').textContent=String(e); $('#finalOut').classList.remove('d-none');
+          await showMessage('Ocorreu um problema de conexão. Verifique a internet e tente novamente.');
+        }
       }
       document.getElementById('btnSubmitAll').addEventListener('click', submitAll);
 
