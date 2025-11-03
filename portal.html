@@ -1,0 +1,2076 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PRODARTE • Inscrição/Recadastramento</title>
+    <link
+      rel="icon"
+      href="https://statics.recife.pe.gov.br/images/dynamics/conecta/icons/favicon.png?w=32&h=32&fit=fill&border=2,transparent,shrink"
+    />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+      :root{
+        --brand:#0d6efd; --brand-dark:#0b5ed7; --bg:#f9fbff; --text:#0b2447; --muted:#6c757d;
+        --stage-w:1379px;
+        --pattern-w:1366px;
+      }
+      body{
+        background:
+          radial-gradient(1200px 600px at -10% -10%, #f0f8ff 0%, #ffffff 60%),
+          radial-gradient(800px 500px at 110% 0%, #f3f7ff 0%, #ffffff 60%),
+          linear-gradient(180deg,#ffffff 0%, #f9fbff 100%);
+        min-height:100vh;
+      }
+      .stage{ width:var(--stage-w); margin:0 auto; position:relative; left:-6px; }
+      header.hero{ width:var(--stage-w); height:240px; background:url('https://statics.recife.pe.gov.br/images/dynamics/zonaazul/banner.jpeg') center/cover no-repeat; }
+      .pattern-strip{ width:var(--pattern-w); margin:0 auto; position:relative; left:-6px; background:url('https://statics.recife.pe.gov.br/images/dynamics/zonaazul/background.jpeg') repeat center/900px auto; }
+      .pattern-top{ height:135px; opacity:.4; }
+      .pattern-bottom{ height:135px; opacity:.4; }
+      .card-form{ border:0; border-radius:1rem; box-shadow:0 12px 34px rgba(13,110,253,.12), 0 6px 16px rgba(13,110,253,.08); overflow:hidden; }
+      .card-form .card-header{ background:linear-gradient(180deg,#ffffff 0%, #f6f9ff 100%); border-bottom:1px solid #eef3ff; }
+      .required::after{ content:" *"; color:#dc3545; font-weight:600; }
+      .help{ font-size:.9rem; color:#6c757d; }
+      .section-title{ font-weight:700; letter-spacing:.2px; color:#0b2447; }
+      .dropzone{ border:2px dashed #cfe2ff; border-radius:.75rem; padding:1rem; background:#f8fbff; }
+      .form-control:focus,.form-select:focus{ box-shadow:0 0 0 .25rem rgba(13,110,253,.15); border-color:var(--brand); }
+      pre.json{ background:#0b1020; color:#e6edf3; border-radius:.75rem; padding:1rem; max-height:40vh; overflow:auto; }
+      .badge-soft{ background:#e7f1ff; color:#0b2447; border:1px solid #cfe2ff; }
+      .form-control[readonly]{ background:#f8f9fa; }
+      .tiny{ font-size:.85rem; }
+      .declaration-box{
+        background:#f8f9fa;
+        border:1px solid #dbe7ff;
+        border-radius:.75rem;
+        padding:1rem 1.25rem;
+        max-height:240px;
+        overflow:auto;
+        font-size:.95rem;
+        line-height:1.55;
+        color:#0b2447;
+      }
+      .declaration-box strong{ letter-spacing:.3px; }
+      .declaration-box::-webkit-scrollbar{ width:8px; }
+      .declaration-box::-webkit-scrollbar-thumb{ background:#c7d5f8; border-radius:999px; }
+      .declaration-check{ margin-top:1rem; }
+      .declaration-check .form-check-input{
+        width:1.3em;
+        height:1.3em;
+        border:2px solid #0b2447;
+        border-radius:.3rem;
+        accent-color:#0b2447;
+        margin-top:.15em;
+      }
+      .declaration-check .form-check-input:focus{
+        box-shadow:0 0 0 .25rem rgba(13,110,253,.2);
+        border-color:#0b2447;
+      }
+      .form-check-input.field-invalid{
+        border-color:#dc3545 !important;
+        box-shadow:0 0 0 .2rem rgba(220,53,69,.25) !important;
+      }
+      .declaration-actions .btn{ min-width:140px; }
+      .field-invalid{ border-color:#dc3545 !important; box-shadow:0 0 0 .2rem rgba(220,53,69,.15) !important; }
+      .review-table td{ vertical-align: top; }
+      .frame-card{
+        max-width: 980px;
+        background:#ffffff;
+        border-radius:1rem;
+        box-shadow:0 18px 40px rgba(13,110,253,.12), 0 8px 22px rgba(13,110,253,.08);
+        padding:2rem;
+        position:relative; z-index:2;
+        margin:-90px auto -90px !important;
+      }
+      .subtle{ color:#6c757d; font-weight:500; letter-spacing:.2px; }
+      .message-overlay{
+        position:fixed;
+        inset:0;
+        background:rgba(11,36,71,.55);
+        display:none;
+        align-items:center;
+        justify-content:center;
+        padding:1.5rem;
+        z-index:1080;
+      }
+      .message-overlay.show{ display:flex; }
+      .message-dialog{
+        background:#ffffff;
+        border-radius:.85rem;
+        box-shadow:0 20px 45px rgba(13,110,253,.18), 0 10px 25px rgba(11,36,71,.25);
+        max-width:420px;
+        width:100%;
+        padding:1.75rem 1.5rem;
+      }
+      .message-dialog h5{ font-weight:700; color:#0b2447; }
+      #alertModal .modal-title span:last-child{ color:#dc3545; }
+      #btnSubmitAll[aria-disabled="true"]{
+        opacity:.6;
+      }
+      @media (max-width: 992px){
+        :root{ --stage-w:100vw; --pattern-w:100vw; }
+        .stage, .pattern-strip{ left:0; }
+        header.hero{ background-position:center; background-size:cover; }
+        body{ overflow-x:hidden; }
+        .frame-card{ margin:-60px auto -60px; padding:1.25rem; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="hero stage"></header>
+    <div class="pattern-strip pattern-top"></div>
+
+    <main class="container my-4 frame-card" id="app">
+      <h2 class="h4 text-center mb-0">PRODARTE</h2>
+      <p class="text-center subtle mb-4">Inscrição/Recadastramento de Artesãos(as) e Empreendedores(as)</p>
+
+      <!-- Seção 1: Tipo de inscrição -->
+      <div class="card card-form mb-4">
+        <div class="card-header">
+          <h2 class="h5 mb-0">Tipo de Inscrição</h2>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label required d-block">Selecione o tipo de inscrição</label>
+              <div class="d-flex gap-3">
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="tipoInscricao" id="inscNova" value="NOVA INSCRIÇÃO" checked>
+                  <label class="form-check-label" for="inscNova">Nova inscrição</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="tipoInscricao" id="inscRec" value="RECADASTRAMENTO">
+                  <label class="form-check-label" for="inscRec">Recadastramento</label>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label required" for="tipoCadastro">Tipo de cadastro</label>
+              <select id="tipoCadastro" class="form-select" required>
+                <option value="" data-products-id="" selected>Selecione...</option>
+                <option value="EMPREENDEDOR" data-products-id="empreendedor">Empreendedor</option>
+                <option value="ECONOMIA SOLIDÁRIA" data-products-id="economia-solidaria">Economia solidária</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seção 2: Produto -->
+      <div class="card card-form mb-4" id="produtoSection">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h2 class="h5 mb-0">Produto</h2>
+          <span class="badge badge-soft">Campos dinâmicos</span>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6 d-none" id="segmentoWrap">
+              <label class="form-label required" for="segmento">Segmento</label>
+              <select id="segmento" class="form-select">
+                <option value="" selected>Selecione...</option>
+                <option value="ARTESAO">Artesanato</option>
+                <option value="GASTRONOMIA">Gastronomia</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label required" for="produto">Escolha o produto</label>
+              <select id="produto" class="form-select" required disabled>
+                <option value="" selected>Selecione...</option>
+                <option value="OUTROS">Outros</option>
+              </select>
+            </div>
+            <div class="col-md-6 d-none" id="produtoOutroWrap">
+              <label class="form-label required" for="produtoOutro">Informe qual é o produto</label>
+              <input type="text" id="produtoOutro" class="form-control" placeholder="Descreva o produto">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seção 3: Identificação Pessoal -->
+      <div class="card card-form mb-4">
+        <div class="card-header">
+          <h2 class="h5 mb-0">Dados Pessoais</h2>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-3">
+              <label class="form-label required" for="cpf">CPF</label>
+              <input type="text" inputmode="numeric" maxlength="14" class="form-control" id="cpf" placeholder="Somente números" required>
+              <div class="help" id="cpfHelp"></div>
+            </div>
+            <div class="col-md-5">
+              <label class="form-label required" for="nome">Nome</label>
+              <input type="text" class="form-control" id="nome" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label" for="nomeSocial">Nome Social (opcional)</label>
+              <input type="text" class="form-control" id="nomeSocial">
+            </div>
+          </div>
+          <div class="row g-3 mt-0">
+            <div class="col-md-6">
+              <label class="form-label" for="rg">Documento de Identidade</label>
+              <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="14" class="form-control" id="rg" placeholder="Somente números">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label required" for="dataNascimento">Data de nascimento</label>
+              <input
+                type="date"
+                class="form-control"
+                id="dataNascimento"
+                name="dataNascimento"
+                required
+              >
+              <div class="invalid-feedback" id="dataNascimentoFeedback">Informe uma data válida no formato DD/MM/AAAA.</div>
+            </div>
+          </div>
+          <div class="row g-3 mt-0">
+            <div class="col-md-6">
+              <label class="form-label required" for="mae">Nome da mãe</label>
+              <input type="text" class="form-control" id="mae" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="pai">Nome do pai</label>
+              <input type="text" class="form-control" id="pai">
+            </div>
+          </div>
+          <div class="row g-3 mt-0">
+            <div class="col-md-6">
+              <label class="form-label required" for="genero">Gênero</label>
+              <select id="genero" class="form-select" required>
+                <option value="" selected>Selecione...</option>
+                <option value="FEMININO">Feminino</option>
+                <option value="MASCULINO">Masculino</option>
+                <option value="NAO_INFORMAR">Prefiro não informar</option>
+                <option value="OUTROS">Outros</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label required" for="raca">Autodeclaração de cor (IBGE)</label>
+              <select id="raca" class="form-select" required>
+                <option value="" selected>Selecione...</option>
+                <option value="BRANCA">Branca</option>
+                <option value="PRETA">Preta</option>
+                <option value="PARDA">Parda</option>
+                <option value="AMARELA">Amarela</option>
+                <option value="INDIGENA">Indígena</option>
+              </select>
+            </div>
+          </div>
+          <div class="row g-3 mt-0">
+            <div class="col-md-6">
+              <label class="form-label required" for="email">E-mail</label>
+              <input type="email" class="form-control" id="email" placeholder="nome@exemplo.com" required>
+              <div class="help" id="emailHelp"></div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label required" for="celular">Celular</label>
+              <input type="text" inputmode="numeric" pattern="\\d*" maxlength="11" class="form-control" id="celular" placeholder="DDD + número (apenas dígitos)" required>
+              <div class="help" id="celHelp"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seção 4: Endereço -->
+      <div class="card card-form mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h2 class="h5 mb-0">Endereço</h2>
+          <span class="badge badge-soft">ViaCEP / BrasilAPI automáticos</span>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-3">
+              <label class="form-label required" for="cep">CEP</label>
+              <input type="text" class="form-control" id="cep" placeholder="00000-000" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label required" for="logradouro">Logradouro (Rua, Avenida, Travessa)</label>
+              <input type="text" class="form-control" id="logradouro" required>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label required" for="numero">Número</label>
+              <input type="text" class="form-control" id="numero" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label" for="complemento">Complemento</label>
+              <input type="text" class="form-control" id="complemento">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label required" for="bairro">Bairro</label>
+              <input type="text" class="form-control" id="bairro" required>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label required" for="cidade">Cidade</label>
+              <input type="text" class="form-control" id="cidade" required>
+            </div>
+            <div class="col-md-1">
+              <label class="form-label required" for="uf">Estado</label>
+              <input type="text" class="form-control" id="uf" maxlength="2" required>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seção 5: Presença Digital / Marca -->
+      <div class="card card-form mb-4">
+        <div class="card-header">
+          <h2 class="h5 mb-0">Marca e Presença Digital</h2>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label" for="carteiraArt">Possui Carteira de Artesão</label>
+              <div class="d-flex gap-3">
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="carteiraArt" id="carteiraSim" value="SIM">
+                  <label class="form-check-label" for="carteiraSim">Sim</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="carteiraArt" id="carteiraNao" value="NAO" checked>
+                  <label class="form-check-label" for="carteiraNao">Não</label>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label" for="numCarteira">Nº da Carteira</label>
+              <input type="text" id="numCarteira" class="form-control" placeholder="Se aplicável" disabled>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label" for="marca">Nome da marca (opcional)</label>
+              <input type="text" id="marca" class="form-control" placeholder="Seu nome de marca">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="instagram">Instagram</label>
+              <input type="text" id="instagram" class="form-control" placeholder="@usuario ou link">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seção 6: MEI / Empresa -->
+      <div class="card card-form mb-4">
+        <div class="card-header">
+          <h2 class="h5 mb-0">Formalização</h2>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label d-block">Possui MEI</label>
+              <div class="d-flex gap-3">
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="temMei" id="meiSim" value="SIM">
+                  <label class="form-check-label" for="meiSim">Sim</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="temMei" id="meiNao" value="NAO" checked>
+                  <label class="form-check-label" for="meiNao">Não</label>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label" for="cnpj">CNPJ</label>
+              <input type="text" id="cnpj" class="form-control" placeholder="Somente números" disabled>
+              <div class="help" id="cnpjHelp"></div>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label" for="fantasia">Nome fantasia</label>
+              <input type="text" id="fantasia" class="form-control" placeholder="Se houver" disabled>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label d-block">Deseja formalizar</label>
+              <div class="d-flex gap-3">
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="formalizar" id="formSim" value="SIM">
+                  <label class="form-check-label" for="formSim">Sim</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="formalizar" id="formNao" value="NAO" checked>
+                  <label class="form-check-label" for="formNao">Não</label>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label d-block">Deseja abrir o MEI agora</label>
+              <div class="d-flex gap-3">
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="abrirMei" id="abrirMeiSim" value="SIM">
+                  <label class="form-check-label" for="abrirMeiSim">Sim</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="abrirMei" id="abrirMeiNao" value="NAO" checked>
+                  <label class="form-check-label" for="abrirMeiNao">Não</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seção 7: Uploads -->
+      <div class="card card-form mb-4">
+        <div class="card-header">
+          <h2 class="h5 mb-0">Envio de Documentos</h2>
+        </div>
+        <div class="card-body">
+          <div class="row g-3 align-items-stretch">
+            <div class="col-12">
+              <label class="form-label required">Documento Oficial (Frente)</label>
+              <div class="dropzone">
+                <input class="form-control" type="file" id="docFrente" accept="image/*,application/pdf">
+              </div>
+            </div>
+            <div class="col-12">
+              <label class="form-label required">Documento Oficial (Verso)</label>
+              <div class="dropzone">
+                <input class="form-control" type="file" id="docVerso" accept="image/*,application/pdf">
+              </div>
+            </div>
+            <div class="col-12">
+              <label class="form-label required">Comprovante de residência</label>
+              <div class="dropzone">
+                <input class="form-control" type="file" id="compDomicilio" accept="image/*,application/pdf">
+              </div>
+            </div>
+            <div class="col-12">
+              <label class="form-label" id="certLabel">Certificado do MEI OU CNPJ</label>
+              <div class="dropzone">
+                <input class="form-control" type="file" id="certMeiCnpj" accept="image/*,application/pdf">
+              </div>
+              <div class="help" id="certHelp">Obrigatório quando possuir MEI ou CNPJ informado.</div>
+            </div>
+          </div>
+          <hr class="my-4">
+          <h3 class="h6 section-title mb-2">Portfólio (Fotos do Trabalho)</h3>
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label required">Foto 1</label>
+              <div class="dropzone"><input class="form-control" type="file" id="foto1" accept="image/*"></div>
+            </div>
+            <div class="col-12">
+              <label class="form-label required">Foto 2</label>
+              <div class="dropzone"><input class="form-control" type="file" id="foto2" accept="image/*"></div>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Foto 3</label>
+              <div class="dropzone"><input class="form-control" type="file" id="foto3" accept="image/*"></div>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Foto 4</label>
+              <div class="dropzone"><input class="form-control" type="file" id="foto4" accept="image/*"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seção 8: Associação e Descrições -->
+      <div class="card card-form mb-4">
+        <div class="card-header">
+          <h2 class="h5 mb-0">Pertencimento e Descrição</h2>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label d-block">Pertence a alguma associação ou cooperativa</label>
+              <div class="d-flex gap-3">
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="associacao" id="assocSim" value="SIM">
+                  <label class="form-check-label" for="assocSim">Sim</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="associacao" id="assocNao" value="NAO" checked>
+                  <label class="form-check-label" for="assocNao">Não</label>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 d-none" id="assocDescWrap">
+              <label class="form-label" for="assocDesc">Descreva associação ou cooperativa que pertence</label>
+              <textarea id="assocDesc" rows="2" class="form-control" placeholder="Nome, cidade, função, tempo de participação..."></textarea>
+            </div>
+            <div class="col-12">
+              <label class="form-label required" for="sobreTrabalho">Fale sobre o seu trabalho</label>
+              <textarea id="sobreTrabalho" rows="4" class="form-control" required placeholder="Técnicas, materiais, temática, público, diferencial..."></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seção 9: Tempo, Renda e Divulgação -->
+      <div class="card card-form mb-4">
+        <div class="card-header">
+          <h2 class="h5 mb-0">Tempo de Atividade, Renda e Divulgação</h2>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label required" for="tempoAtv">Tempo de atividade</label>
+              <select id="tempoAtv" class="form-select" required>
+                <option value="" selected>Selecione...</option>
+                <option>Menos de 6 meses</option>
+                <option>Entre 6 e 12 meses</option>
+                <option>De 1 a 2 anos</option>
+                <option>De 3 a 5 anos</option>
+                <option>Mais de 5 anos</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label required" for="renda">Rendimento médio mensal</label>
+              <select id="renda" class="form-select" required>
+                <option value="" selected>Selecione...</option>
+                <option>Até 1 salário mínimo</option>
+                <option>De 1 a 2 salários mínimos</option>
+                <option>De 2 a 3 salários mínimos</option>
+                <option>De 3 a 5 salários mínimos</option>
+                <option>Mais de 5 salários mínimos</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label required" for="divulgacao">Como ficou sabendo do PRODARTE</label>
+              <select id="divulgacao" class="form-select" required>
+                <option value="" selected>Selecione...</option>
+                <option value="Redes sociais">Redes sociais</option>
+                <option value="Site da prefeitura-Conecta Recife">Site da prefeitura/Conecta Recife</option>
+                <option value="Evento-Organização">Evento/Organização</option>
+                <option value="Indicação">Indicação</option>
+                <option value="OUTRO">Outro</option>
+              </select>
+            </div>
+            <div class="col-md-6 d-none" id="orgWrap">
+              <label class="form-label required" for="organizador">Especificar organizador (a)</label>
+              <select id="organizador" class="form-select">
+                <option value="" selected>Selecione...</option>
+                <option>SESAU</option>
+                <option>Secretaria de Cultura</option>
+                <option>Emprel</option>
+                <option>CARP (Casa do Artesão)</option>
+                <option>Outro órgão/ONG</option>
+              </select>
+            </div>
+            <div class="col-md-6 d-none" id="comoWrap">
+              <label class="form-label required" for="comoSoube">Informe como ficou sabendo</label>
+              <select id="comoSoube" class="form-select">
+                <option value="" selected>Selecione...</option>
+                <option>WhatsApp</option>
+                <option>Facebook</option>
+                <option>Instagram</option>
+                <option>Amigo(a)/Familiar</option>
+                <option>Outro meio</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seção 10: Revisão e Envio -->
+      <div class="card card-form mb-5">
+        <div class="card-header">
+          <h2 class="h5 mb-0">Revisão e envio</h2>
+        </div>
+        <div class="card-body">
+          <div id="reviewBlock" class="mb-4"></div>
+
+          <div class="mb-4">
+            <h3 class="h6 section-title mb-2">Autodeclaração étnico-racial</h3>
+            <div id="racialDeclarationText" class="declaration-box" tabindex="0" role="textbox" aria-readonly="true"></div>
+            <div class="form-check declaration-check">
+              <input class="form-check-input" type="checkbox" id="racialDeclarationAgree">
+              <label class="form-check-label" for="racialDeclarationAgree">Confirmo que a autodeclaração acima corresponde à minha manifestação.</label>
+            </div>
+            <div class="form-text tiny mt-2" id="racialDeclarationHint">Leia o texto completo e marque o aceite quando estiver de acordo.</div>
+          </div>
+
+          <div class="mb-4">
+            <h3 class="h6 section-title mb-2">Declaração de responsabilidade</h3>
+            <div id="responsibilityText" class="declaration-box" tabindex="0" role="textbox" aria-readonly="true">
+              DECLARO que todas as informações fornecidas são verdadeiras e exatas, DECLARO, ainda, estar ciente de que prestar declaração falsa caracteriza o crime de falsidade ideológica previsto no art. 299 do Código Penal Brasileiro, e que por tal crime serei responsabilizado, independentemente das sanções administrativas, caso se comprove a inveracidade do declarado neste documento. DECLARO estar ciente e de acordo com os termos da Política de Privacidade, nos termos da Lei nº 13.709/2018 (Lei Geral de Proteção de Dados Pessoais – LGPD). DECLARO, por fim, que tomo ciência, neste ato, de toda a legislação mencionada acima.
+            </div>
+            <div class="form-check declaration-check">
+              <input class="form-check-input" type="checkbox" id="termoResponsabilidade">
+              <label class="form-check-label" for="termoResponsabilidade">Li e estou de acordo com a declaração de responsabilidade.</label>
+            </div>
+            <div class="form-text tiny mt-2" id="responsibilityHint">Leia o texto completo e marque o aceite quando estiver de acordo.</div>
+          </div>
+
+          <div class="d-flex flex-wrap gap-2 declaration-actions mb-3">
+            <button type="button" class="btn btn-outline-success" id="acceptAllDeclarations">Aceitar tudo</button>
+            <button type="button" class="btn btn-outline-danger" id="declineAllDeclarations">Não aceitar</button>
+          </div>
+
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-secondary" id="btnSubmitAll" aria-disabled="true">Enviar dados</button>
+            <div id="finalStatus" class="ms-2"></div>
+          </div>
+          <pre class="json mt-3 d-none" id="finalOut"></pre>
+        </div>
+      </div>
+
+      <div class="text-center text-muted mb-5">Este formulário realiza pré-validações e coleta de dados para o cadastro PRODARTE.</div>
+    </main>
+
+    <div class="pattern-strip pattern-bottom"></div>
+
+    <div class="modal fade" id="messageModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Mensagem</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+          </div>
+          <div class="modal-body">
+            <p class="mb-0" id="messageModalBody"></p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="alertModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header border-0">
+            <h5 class="modal-title text-danger fw-bold d-flex align-items-center gap-2"><span aria-hidden="true">⚠️</span><span>Alerta</span></h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+          </div>
+          <div class="modal-body">
+            <div id="alertModalBody"></div>
+          </div>
+          <div class="modal-footer border-0">
+            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Entendi</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="message-overlay" id="dialogFallback" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="message-dialog">
+        <h5 class="mb-3" id="dialogFallbackTitle">Mensagem</h5>
+        <div class="mb-4" id="dialogFallbackBody"></div>
+        <div class="text-end">
+          <button type="button" class="btn btn-primary" id="dialogFallbackClose">OK</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const FINAL_ENDPOINT = "https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/cadastro-prodarte";
+      const PRODUCTS_ENDPOINT = "https://webhook-n8n-dev-conectarecife.recife.pe.gov.br/webhook/prodarte-produtos";
+
+      const messageModalEl = document.getElementById('messageModal');
+      const messageModalBody = document.getElementById('messageModalBody');
+      const messageModal = (window.bootstrap && messageModalEl) ? new window.bootstrap.Modal(messageModalEl) : null;
+      const alertModalEl = document.getElementById('alertModal');
+      const alertModalBody = document.getElementById('alertModalBody');
+      const alertModal = (window.bootstrap && alertModalEl) ? new window.bootstrap.Modal(alertModalEl) : null;
+      const fallbackOverlay = document.getElementById('dialogFallback');
+      const fallbackTitle = document.getElementById('dialogFallbackTitle');
+      const fallbackBody = document.getElementById('dialogFallbackBody');
+      const fallbackClose = document.getElementById('dialogFallbackClose');
+
+      function openFallbackDialog({ title, bodyHtml, focusAfter, variant = 'default' }){
+        if(!(fallbackOverlay && fallbackBody && fallbackClose && fallbackTitle)){
+          console.warn('Nenhum fallback de diálogo disponível.');
+          return Promise.resolve();
+        }
+        fallbackTitle.textContent = title;
+        fallbackTitle.classList.toggle('text-danger', variant === 'danger');
+        fallbackBody.innerHTML = bodyHtml;
+        fallbackOverlay.classList.add('show');
+        fallbackOverlay.setAttribute('aria-hidden','false');
+        try{ fallbackClose.focus({ preventScroll: true }); }
+        catch(e){ fallbackClose.focus(); }
+        return new Promise(resolve => {
+          const close = () => {
+            fallbackOverlay.classList.remove('show');
+            fallbackOverlay.setAttribute('aria-hidden','true');
+            fallbackClose.removeEventListener('click', close);
+            fallbackOverlay.removeEventListener('click', overlayHandler);
+            document.removeEventListener('keydown', escHandler);
+            if(focusAfter && typeof focusAfter.focus === 'function'){
+              focusAfter.focus();
+            }
+            resolve();
+          };
+          const overlayHandler = (event) => {
+            if(event.target === fallbackOverlay){
+              event.preventDefault();
+              close();
+            }
+          };
+          const escHandler = (event) => {
+            if(event.key === 'Escape'){
+              event.preventDefault();
+              close();
+            }
+          };
+          fallbackClose.addEventListener('click', close, { once: true });
+          fallbackOverlay.addEventListener('click', overlayHandler);
+          document.addEventListener('keydown', escHandler, { once: true });
+        });
+      }
+
+      function showMessage(text){
+        if(messageModal && messageModalBody){
+          messageModalBody.textContent = text;
+          return new Promise(resolve => {
+            messageModalEl.addEventListener('hidden.bs.modal', function handler(){
+              messageModalEl.removeEventListener('hidden.bs.modal', handler);
+              resolve();
+            }, { once: true });
+            messageModal.show();
+          });
+        }
+        const safeBody = `<p class="mb-0">${esc(text)}</p>`;
+        return openFallbackDialog({ title: 'Mensagem', bodyHtml: safeBody, variant: 'default' });
+      }
+
+      function renderIssueList(issues){
+        if(!Array.isArray(issues) || issues.length === 0){
+          return '<p class="mb-0">Preencha os campos obrigatórios antes de enviar.</p>';
+        }
+        const items = issues.map(item => `<li>${esc(item.message)}</li>`).join('');
+        return `<p class="mb-2 text-muted">Verifique os campos abaixo:</p><ul class="mb-0 ps-3">${items}</ul>`;
+      }
+
+      function showAlertMissingFields(issues, focusAfter){
+        const bodyHtml = renderIssueList(issues);
+        if(alertModal && alertModalBody){
+          alertModalBody.innerHTML = bodyHtml;
+          return new Promise(resolve => {
+            alertModalEl.addEventListener('hidden.bs.modal', function handler(){
+              alertModalEl.removeEventListener('hidden.bs.modal', handler);
+              if(focusAfter && typeof focusAfter.focus === 'function'){
+                focusAfter.focus();
+              }
+              resolve();
+            }, { once: true });
+            alertModal.show();
+          });
+        }
+        return openFallbackDialog({ title: '⚠️ Alerta', bodyHtml, focusAfter, variant: 'danger' });
+      }
+
+      // Utils -------------------------------------------------------------
+      const $ = (sel) => document.querySelector(sel);
+      const onlyDigits = (s) => (s||'').replace(/\\D+/g, '');
+      const normalize = (value) => (value||'').normalize('NFD').replace(/\p{Diacritic}/gu, '').toUpperCase().trim();
+      const esc = s => { const d=document.createElement('div'); d.innerText=s??''; return d.innerHTML||''; };
+      const fmtCPF = v => { const d = onlyDigits(v||''); return d.length===11 ? d.replace(/(\\d{3})(\\d{3})(\\d{3})(\\d{2})/,'$1.$2.$3-$4') : (d||''); };
+      const fmtCEP = v => { const d = onlyDigits(v||''); return d.length===8 ? d.replace(/(\d{5})(\d{3})/,'$1-$2') : (d||''); };
+      const ISO_DATE_REGEX = /^(\d{4})-(\d{2})-(\d{2})$/;
+      const MIN_BIRTH_YEAR = 1900;
+      const isLeapYear = (year) => {
+        const y = Number(year);
+        if(!Number.isFinite(y)) return false;
+        return (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0);
+      };
+      const fmtDateBR = (value) => {
+        if(!value) return '';
+        if(ISO_DATE_REGEX.test(value)){
+          const match = value.match(ISO_DATE_REGEX);
+          return `${match[3]}/${match[2]}/${match[1]}`;
+        }
+        return value;
+      };
+      function getDataNascimentoISO(){
+        const input = $('#dataNascimento');
+        return input ? input.value : '';
+      }
+      const FIELD_LABELS = {
+        '#tipoCadastro': 'Tipo de cadastro',
+        '#segmento': 'Segmento',
+        '#produto': 'Produto',
+        '#produtoOutro': 'Informe o produto',
+        '#cpf': 'CPF',
+        '#nome': 'Nome completo',
+        '#genero': 'Gênero',
+        '#raca': 'Autodeclaração de cor',
+        '#mae': 'Nome da mãe',
+        '#pai': 'Nome do pai',
+        '#dataNascimento': 'Data de nascimento',
+        '#email': 'E-mail',
+        '#celular': 'Telefone celular',
+        '#cep': 'CEP',
+        '#logradouro': 'Logradouro',
+        '#numero': 'Número',
+        '#bairro': 'Bairro',
+        '#cidade': 'Cidade',
+        '#uf': 'UF',
+        '#sobreTrabalho': 'Sobre o trabalho',
+        '#tempoAtv': 'Tempo de atividade',
+        '#renda': 'Renda média mensal',
+        '#divulgacao': 'Como ficou sabendo',
+        '#organizador': 'Informe o evento ou organização',
+        '#comoSoube': 'Informe o outro canal',
+        '#assocDesc': 'Descrição da associação',
+        '#docFrente': 'Documento de identidade (frente)',
+        '#docVerso': 'Documento de identidade (verso)',
+        '#compDomicilio': 'Comprovante de residência',
+        '#certMeiCnpj': 'Certificado MEI/CNPJ',
+        '#foto1': 'Foto 1',
+        '#foto2': 'Foto 2',
+        '#foto3': 'Foto 3',
+        '#foto4': 'Foto 4',
+        '#cnpj': 'CNPJ',
+        '#termoResponsabilidade': 'Termo de responsabilidade',
+        '#racialDeclarationAgree': 'Autodeclaração étnico-racial'
+      };
+
+      let validationState = { allOk: false, issues: [], focusElement: null };
+
+      function setFieldInvalid(el, invalid){
+        if(!el) return;
+        el.classList.toggle('field-invalid', !!invalid);
+      }
+
+      // Normalização para produtos ---------------------------------------
+      const norm = (s) => String(s || '')
+        .normalize('NFD')
+        .replace(/[\\u0300-\\u036f]/g, '')
+        .trim()
+        .toLowerCase();
+
+      // Validators --------------------------------------------------------
+      function isValidCPF(cpf){
+        cpf = onlyDigits(cpf);
+        if(!cpf || cpf.length !== 11) return false;
+        if(/^(\\d)\\1+$/.test(cpf)) return false;
+        let soma=0, rest;
+        for(let i=1;i<=9;i++) soma += parseInt(cpf.substring(i-1,i))*(11-i);
+        rest=(soma*10)%11; if(rest===10||rest===11) rest=0; if(rest!==parseInt(cpf.substring(9,10))) return false;
+        soma=0; for(let i=1;i<=10;i++) soma += parseInt(cpf.substring(i-1,i))*(12-i);
+        rest=(soma*10)%11; if(rest===10||rest===11) rest=0; if(rest!==parseInt(cpf.substring(10,11))) return false;
+        return true;
+      }
+      function isValidCNPJ(cnpj){
+        cnpj = onlyDigits(cnpj);
+        if(!cnpj || cnpj.length !== 14) return false;
+        if(/^(\\d)\\1+$/.test(cnpj)) return false;
+        let tamanho = cnpj.length - 2;
+        let numeros = cnpj.substring(0,tamanho);
+        let digitos = cnpj.substring(tamanho);
+        let soma = 0;
+        let pos = tamanho - 7;
+        for (let i = tamanho; i >= 1; i--){ soma += numeros.charAt(tamanho - i) * pos--; if (pos < 2) pos = 9; }
+        let resultado = soma % 11 < 2 ? 0 : 11 - soma % 11; if (resultado != digitos.charAt(0)) return false;
+        tamanho = tamanho + 1; numeros = cnpj.substring(0,tamanho); soma = 0; pos = tamanho - 7;
+        for (let i = tamanho; i >= 1; i--){ soma += numeros.charAt(tamanho - i) * pos--; if (pos < 2) pos = 9; }
+        resultado = soma % 11 < 2 ? 0 : 11 - soma % 11; if (resultado != digitos.charAt(1)) return false;
+        return true;
+      }
+      function isValidCell(v){
+        const d = onlyDigits(v);
+        return /^(?:[1-9][0-9])9[0-9]{8}$/.test(d);
+      }
+      function isValidEmail(v){
+        return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(v||'').trim());
+      }
+      function isRecifeCity(value){
+        if(!value) return false;
+        return normalize(value) === 'RECIFE';
+      }
+      function isAdultISO(isoValue){
+        if(!isoValue || !ISO_DATE_REGEX.test(isoValue)){
+          return false;
+        }
+        const match = isoValue.match(ISO_DATE_REGEX);
+        const y = Number(match[1]);
+        const m = Number(match[2]);
+        const d = Number(match[3]);
+        const birth = new Date(y, m - 1, d);
+        if(Number.isNaN(birth.getTime())) return false;
+        const today = new Date();
+        let age = today.getFullYear() - birth.getFullYear();
+        const monthDiff = today.getMonth() - birth.getMonth();
+        if(monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())){
+          age--;
+        }
+        return age >= 18;
+      }
+
+      // Upper/Lower transforms -------------------------------------------
+      function toUpperLive(id){ const el=$(id); el.addEventListener('input', e=>{ e.target.value = (e.target.value||'').toUpperCase(); updateReview(); }); }
+      function toLowerLive(id){ const el=$(id); el.addEventListener('input', e=>{ e.target.value = (e.target.value||'').toLowerCase(); updateReview(); }); }
+
+      // Bind transforms
+      ['#nome','#nomeSocial','#mae','#pai','#logradouro','#numero','#bairro','#complemento','#cidade','#uf','#marca','#fantasia']
+        .forEach(toUpperLive);
+      ['#email','#instagram']
+        .forEach(toLowerLive);
+
+      // Masks/validations live
+      $('#cpf').addEventListener('input', e=>{ e.target.value=onlyDigits(e.target.value).slice(0,11); const ok=isValidCPF(e.target.value); $('#cpfHelp').textContent = ok? '' : 'CPF inválido'; updateReview(); refreshSubmitState(); });
+      $('#cpf').addEventListener('keydown', e=>{
+        if(e.ctrlKey || e.metaKey || e.altKey) return;
+        const allowedKeys = ['Backspace','Tab','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Delete','Home','End'];
+        if(allowedKeys.includes(e.key)) return;
+        if(/^[0-9]$/.test(e.key)) return;
+        e.preventDefault();
+      });
+      $('#cpf').addEventListener('paste', e=>{
+        e.preventDefault();
+        const input = e.target;
+        const clip = (e.clipboardData || window.clipboardData);
+        const paste = onlyDigits((clip && clip.getData ? clip.getData('text') : '') || '').slice(0,11);
+        const start = input.selectionStart || 0;
+        const end = input.selectionEnd || 0;
+        const value = input.value;
+        const newValue = (value.slice(0, start) + paste + value.slice(end)).slice(0,11);
+        input.value = newValue;
+        const newPos = Math.min(start + paste.length, newValue.length);
+        requestAnimationFrame(()=>{
+          input.setSelectionRange(newPos, newPos);
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+      });
+      $('#celular').addEventListener('input', e=>{
+        const digits = onlyDigits(e.target.value).slice(0,11);
+        e.target.value = digits;
+        const ok = isValidCell(digits);
+        $('#celHelp').textContent = ok? '' : 'Informe um celular válido com DDD (11 dígitos).';
+        e.target.setCustomValidity(ok ? '' : 'Informe um celular válido com DDD.');
+        updateReview(); refreshSubmitState();
+      });
+      $('#celular').addEventListener('keydown', e=>{
+        if(e.ctrlKey || e.metaKey || e.altKey) return;
+        const allowedKeys = ['Backspace','Tab','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Delete','Home','End'];
+        if(allowedKeys.includes(e.key)) return;
+        if(/^[0-9]$/.test(e.key)) return;
+        e.preventDefault();
+      });
+      $('#celular').addEventListener('paste', e=>{
+        e.preventDefault();
+        const input = e.target;
+        const paste = onlyDigits(e.clipboardData.getData('text'));
+        const start = input.selectionStart || 0;
+        const end = input.selectionEnd || 0;
+        const value = input.value;
+        const newValue = (value.slice(0, start) + paste + value.slice(end)).slice(0,11);
+        input.value = newValue;
+        const newPos = Math.min(start + paste.length, newValue.length);
+        requestAnimationFrame(()=>{ input.setSelectionRange(newPos, newPos); input.dispatchEvent(new Event('input', { bubbles: true })); });
+      });
+      $('#rg').addEventListener('input', e=>{
+        const digits = onlyDigits(e.target.value).slice(0,14);
+        if(e.target.value !== digits){
+          e.target.value = digits;
+        }
+        updateReview();
+        refreshSubmitState();
+      });
+      $('#rg').addEventListener('keydown', e=>{
+        if(e.ctrlKey || e.metaKey || e.altKey) return;
+        const allowedKeys = ['Backspace','Tab','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Delete','Home','End'];
+        if(allowedKeys.includes(e.key)) return;
+        if(/^[0-9]$/.test(e.key)) return;
+        e.preventDefault();
+      });
+      $('#rg').addEventListener('paste', e=>{
+        e.preventDefault();
+        const input = e.target;
+        const clip = (e.clipboardData || window.clipboardData);
+        const paste = onlyDigits((clip && clip.getData ? clip.getData('text') : '') || '').slice(0,14);
+        const start = input.selectionStart || 0;
+        const end = input.selectionEnd || 0;
+        const value = input.value;
+        const newValue = (value.slice(0, start) + paste + value.slice(end)).slice(0,14);
+        input.value = newValue;
+        const newPos = Math.min(start + paste.length, newValue.length);
+        requestAnimationFrame(()=>{
+          input.setSelectionRange(newPos, newPos);
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+      });
+      function sanitizeNumeroValue(value){
+        const upper = String(value || '').toUpperCase();
+        if(['S','S/','S/N'].includes(upper)) return upper;
+        return upper.replace(/[^0-9]/g, '');
+      }
+      function numeroIsValid(value){
+        return value === 'S/N' || /^[0-9]+$/.test(value);
+      }
+      $('#numero').addEventListener('input', e=>{
+        const sanitized = sanitizeNumeroValue(e.target.value);
+        if(e.target.value !== sanitized){
+          e.target.value = sanitized;
+        }
+        const ok = numeroIsValid(sanitized);
+        e.target.setCustomValidity(ok ? '' : 'Informe o número ou S/N.');
+        updateReview(); refreshSubmitState();
+      });
+      $('#numero').addEventListener('blur', e=>{
+        const sanitized = sanitizeNumeroValue(e.target.value);
+        if(e.target.value !== sanitized){
+          e.target.value = sanitized;
+        }
+        const ok = numeroIsValid(sanitized);
+        e.target.setCustomValidity(ok ? '' : 'Informe o número ou S/N.');
+      });
+      $('#numero').addEventListener('keydown', e=>{
+        if(e.ctrlKey || e.metaKey || e.altKey) return;
+        const allowedKeys = ['Backspace','Tab','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Delete','Home','End'];
+        if(allowedKeys.includes(e.key)) return;
+        if(/^[0-9]$/.test(e.key)) return;
+        if(['s','S','/','n','N'].includes(e.key)) return;
+        e.preventDefault();
+      });
+      $('#numero').addEventListener('paste', e=>{
+        e.preventDefault();
+        const input = e.target;
+        const paste = sanitizeNumeroValue(e.clipboardData.getData('text'));
+        const start = input.selectionStart || 0;
+        const end = input.selectionEnd || 0;
+        const value = input.value;
+        const newValue = sanitizeNumeroValue(value.slice(0, start) + paste + value.slice(end));
+        input.value = newValue;
+        const ok = numeroIsValid(newValue);
+        input.setCustomValidity(ok ? '' : 'Informe o número ou S/N.');
+        updateReview(); refreshSubmitState();
+      });
+      function updateEmailHelp(value, ok){
+        const help = $('#emailHelp');
+        if(help){
+          help.textContent = value ? (ok ? '' : 'Informe um e-mail válido.') : '';
+        }
+      }
+      $('#email').addEventListener('input', e=>{
+        const value = e.target.value.trim();
+        const ok = isValidEmail(value);
+        if(!value){
+          e.target.setCustomValidity('');
+        }else{
+          e.target.setCustomValidity(ok ? '' : 'Informe um e-mail válido.');
+        }
+        updateEmailHelp(value, ok);
+        updateReview(); refreshSubmitState();
+      });
+      $('#email').addEventListener('blur', async e=>{
+        const value = e.target.value.trim();
+        const ok = isValidEmail(value);
+        if(value && !ok){
+          await showMessage('E-mail inválido. Verifique e tente novamente.');
+          e.target.value = '';
+          e.target.setCustomValidity('');
+          updateEmailHelp('', true);
+          updateReview();
+          refreshSubmitState();
+          e.target.focus();
+          return;
+        }
+        updateEmailHelp(value, ok);
+      });
+
+      async function enforceRecife(){
+        const input = $('#cidade');
+        if(!input) return;
+        const value = input.value.trim();
+        if(!value){
+          input.setCustomValidity('');
+          return;
+        }
+        if(isRecifeCity(value)){
+          input.value = value.toUpperCase();
+          input.setCustomValidity('');
+        }else{
+          await showMessage('Serviço destina-se exclusivamente para moradores da cidade do Recife');
+          ['#cep','#logradouro','#numero','#complemento','#bairro','#cidade','#uf']
+            .forEach(sel => {
+              const field = $(sel);
+              if(field){ field.value = ''; }
+            });
+          input.setCustomValidity('Serviço destina-se exclusivamente para moradores da cidade do Recife');
+          const focusTarget = $('#cep') || input;
+          if(focusTarget){ focusTarget.focus(); }
+        }
+        const numeroField = $('#numero');
+        if(numeroField){
+          const sanitizedNumero = sanitizeNumeroValue(numeroField.value);
+          numeroField.value = sanitizedNumero;
+          numeroField.setCustomValidity(numeroIsValid(sanitizedNumero) ? '' : 'Informe o número ou S/N.');
+        }
+        updateReview();
+        refreshSubmitState();
+      }
+
+      $('#cidade').addEventListener('blur', enforceRecife);
+      $('#cidade').addEventListener('change', enforceRecife);
+      const BIRTHDATE_INVALID_MESSAGE = 'Informe uma data válida no formato DD/MM/AAAA.';
+      const BIRTHDATE_AGE_MESSAGE = 'A inscrição é permitida apenas para pessoas com 18 anos ou mais.';
+      function updateBirthdateFeedback(message){
+        const feedback = document.getElementById('dataNascimentoFeedback');
+        if(feedback){
+          feedback.textContent = message || BIRTHDATE_INVALID_MESSAGE;
+        }
+      }
+      function evaluateBirthdate(options = {}){
+        const { showFeedback = false } = options;
+        const input = $('#dataNascimento');
+        if(!input){
+          return { valid:false, iso:'', reason:'missing', message:BIRTHDATE_INVALID_MESSAGE };
+        }
+        const defaultMessage = BIRTHDATE_INVALID_MESSAGE;
+        const iso = (input.value || '').trim();
+        const today = new Date();
+        let result = { valid:false, iso:'', reason:'', message:defaultMessage };
+
+        if(!iso){
+          result.reason = 'empty';
+        }else if(!ISO_DATE_REGEX.test(iso)){
+          result.reason = 'format';
+        }else{
+          const [yearStr, monthStr, dayStr] = iso.split('-');
+          const year = Number(yearStr);
+          const month = Number(monthStr);
+          const day = Number(dayStr);
+          if(!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day)){
+            result.reason = 'format';
+          }else if(year < MIN_BIRTH_YEAR || year > today.getFullYear()){
+            result.reason = 'range';
+          }else if(month < 1 || month > 12){
+            result.reason = 'range';
+          }else{
+            const monthDays = [31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+            const maxDay = monthDays[month - 1] || 31;
+            if(day < 1 || day > maxDay){
+              result.reason = 'range';
+            }else{
+              const candidate = new Date(year, month - 1, day);
+              if(Number.isNaN(candidate.getTime()) || candidate.getFullYear() !== year || candidate.getMonth() !== month - 1 || candidate.getDate() !== day){
+                result.reason = 'format';
+              }else if(candidate > today){
+                result.reason = 'future';
+              }else if(!isAdultISO(iso)){
+                result = { valid:false, iso:'', reason:'age', message:BIRTHDATE_AGE_MESSAGE };
+              }else{
+                result = { valid:true, iso, reason:'valid', message:'' };
+              }
+            }
+          }
+        }
+
+        if(showFeedback){
+          if(result.valid){
+            input.classList.remove('is-invalid');
+            setFieldInvalid(input, false);
+            input.setCustomValidity('');
+            updateBirthdateFeedback(defaultMessage);
+          }else{
+            input.classList.add('is-invalid');
+            setFieldInvalid(input, true);
+            const feedbackMessage = result.message || defaultMessage;
+            input.setCustomValidity(feedbackMessage);
+            updateBirthdateFeedback(feedbackMessage);
+          }
+        }else{
+          input.setCustomValidity('');
+        }
+        return result;
+      }
+      const birthInput = $('#dataNascimento');
+      if(birthInput){
+        updateBirthdateFeedback(BIRTHDATE_INVALID_MESSAGE);
+        birthInput.addEventListener('input', ()=>{
+          updateReview();
+          refreshSubmitState();
+        });
+        birthInput.addEventListener('change', ()=>{
+          evaluateBirthdate({ showFeedback: false });
+          updateReview();
+          refreshSubmitState();
+        });
+        birthInput.addEventListener('blur', async e=>{
+          const result = evaluateBirthdate({ showFeedback: true });
+          updateReview();
+          refreshSubmitState();
+          if(!result.valid && result.reason !== 'empty' && result.message){
+            await showMessage(result.message);
+            e.target.focus();
+          }
+        });
+      }
+
+      // Produtos (carregar e filtrar) ------------------------------------
+      function populateProductsFromResponse(baseList, segmentoFiltro=''){
+        const sel = document.getElementById('produto');
+        while (sel.options.length) sel.remove(0);
+        sel.add(new Option('Selecione...',''));
+
+        const base = Array.isArray(baseList) ? baseList : [];
+        const filtroNorm = segmentoFiltro ? norm(segmentoFiltro) : '';
+        const seen = new Set();
+        const produtosOrdenados = [];
+        const pick = (obj, keys) => {
+          for(const key of keys){
+            if(obj && obj[key] !== undefined && obj[key] !== null){
+              const value = String(obj[key]).trim();
+              if(value) return value;
+            }
+          }
+          return '';
+        };
+
+        base.forEach(item => {
+          let label = '';
+          let value = '';
+          let segmentoItem = '';
+          if(typeof item === 'string'){
+            label = item.trim();
+            value = label;
+          }else if(item && typeof item === 'object'){
+            label = pick(item, ['produto','nome','label','descricao','description']);
+            value = pick(item, ['valor','value','id','codigo','produto','nome','label']);
+            segmentoItem = pick(item, ['segmento','segment','categoria','categoria_nome','categoriaNome','grupo','tipo']);
+            if(!label) label = value;
+            if(!value) value = label;
+          }
+          if(!label) return;
+          if(filtroNorm){
+            const segNorm = segmentoItem ? norm(segmentoItem) : '';
+            if(segmentoItem && segNorm !== filtroNorm) return;
+          }
+          const key = norm(value || label);
+          if(!key || key === norm('Outros') || seen.has(key)) return;
+          seen.add(key);
+          produtosOrdenados.push({ label, value });
+        });
+
+        produtosOrdenados
+          .sort((a,b)=>a.label.localeCompare(b.label,'pt-BR',{ sensitivity: 'base' }))
+          .forEach(item => sel.add(new Option(item.label, item.value)));
+
+        sel.add(new Option('Outros', 'OUTROS'));
+        sel.value = '';
+      }
+
+      function resetProdutoOutro(){
+        document.getElementById('produtoOutroWrap').classList.add('d-none');
+        document.getElementById('produtoOutro').required = false;
+        document.getElementById('produtoOutro').value = '';
+      }
+
+      function updateSegmentoVisibility(){
+        const tipoSelect = document.getElementById('tipoCadastro');
+        const option = tipoSelect ? tipoSelect.selectedOptions[0] : null;
+        const tipoId = option ? (option.dataset?.productsId || option.value || '').trim() : '';
+        const wrap = document.getElementById('segmentoWrap');
+        const select = document.getElementById('segmento');
+        const show = tipoId === 'empreendedor';
+        if(wrap && select){
+          wrap.classList.toggle('d-none', !show);
+          select.required = show;
+          select.disabled = !show;
+          if(!show){
+            select.value = '';
+          }
+        }
+        return { tipoId, show };
+      }
+
+      async function loadProducts(){
+        const sel = document.getElementById('produto');
+        sel.disabled = true;
+        while (sel.options.length) sel.remove(0);
+        sel.add(new Option('Carregando...', ''));
+
+        const { tipoId, show } = updateSegmentoVisibility();
+        const segmentoSelect = document.getElementById('segmento');
+        const segmentoValor = show && segmentoSelect ? segmentoSelect.value : '';
+        const isEconomiaSolidaria = tipoId === 'economia-solidaria';
+        const produtoSection = document.getElementById('produtoSection');
+        if(produtoSection){
+          produtoSection.classList.toggle('d-none', isEconomiaSolidaria);
+        }
+
+        if(isEconomiaSolidaria){
+          sel.required = false;
+          sel.disabled = true;
+          while (sel.options.length) sel.remove(0);
+          sel.add(new Option('Selecione...', ''));
+          sel.value = '';
+          resetProdutoOutro();
+          return;
+        }
+
+        if(!tipoId){
+          while (sel.options.length) sel.remove(0);
+          sel.add(new Option('Selecione o tipo de cadastro...', ''));
+          sel.value = '';
+          sel.disabled = true;
+          sel.required = false;
+          if(produtoSection){
+            produtoSection.classList.remove('d-none');
+          }
+          resetProdutoOutro();
+          return;
+        }
+
+        sel.required = true;
+
+        if(show && !segmentoValor){
+          while (sel.options.length) sel.remove(0);
+          sel.add(new Option('Selecione o segmento para listar os produtos', ''));
+          sel.value = '';
+          sel.disabled = true;
+          resetProdutoOutro();
+          return;
+        }
+
+        const payload = { id: tipoId };
+        if(segmentoValor){
+          payload.segmento = segmentoValor;
+          payload.segment = segmentoValor;
+        }
+
+        let products = [];
+        try{
+          const res = await fetch(PRODUCTS_ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+            cache: 'no-store'
+          });
+          if(!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          products = Array.isArray(data) ? data : (data?.items || data?.itens || []);
+        }catch(e){
+          console.warn('Falha ao carregar produtos:', e);
+          products = [];
+        }
+
+        populateProductsFromResponse(products, segmentoValor);
+        sel.disabled = false;
+        resetProdutoOutro();
+      }
+
+      document.getElementById('produto').addEventListener('change', (e)=>{
+        const outro = e.target.value === 'OUTROS';
+        document.getElementById('produtoOutroWrap').classList.toggle('d-none', !outro);
+        document.getElementById('produtoOutro').required = outro;
+        if(!outro){ document.getElementById('produtoOutro').value=''; }
+        updateReview(); refreshSubmitState();
+      });
+
+      document.getElementById('tipoCadastro').addEventListener('change', ()=>{
+        updateSegmentoVisibility();
+        loadProducts();
+        updateReview(); refreshSubmitState();
+      });
+
+      document.getElementById('segmento').addEventListener('change', ()=>{
+        loadProducts();
+        updateReview(); refreshSubmitState();
+      });
+
+      // Carteira Artesão toggle
+      document.querySelectorAll('input[name="carteiraArt"]').forEach(r=>{
+        r.addEventListener('change', ()=>{
+          const sim = document.getElementById('carteiraSim').checked;
+          $('#numCarteira').disabled = !sim; $('#numCarteira').required = sim; if(!sim) $('#numCarteira').value='';
+        });
+      });
+
+      // MEI toggle
+      document.querySelectorAll('input[name="temMei"]').forEach(r=>{
+        r.addEventListener('change', ()=>{
+          const sim = document.getElementById('meiSim').checked;
+          ['#cnpj','#fantasia'].forEach(sel=>{ const el=$(sel); el.disabled=!sim; el.required=sim; if(!sim) el.value=''; });
+          $('#certMeiCnpj').required = sim; // certificado exigido quando possui MEI
+          refreshSubmitState(); updateReview();
+        });
+      });
+
+      // Associação toggle
+      function toggleAssocDesc(){
+        const sim = document.getElementById('assocSim').checked;
+        const wrap = document.getElementById('assocDescWrap');
+        const field = document.getElementById('assocDesc');
+        if(!wrap || !field) return;
+        wrap.classList.toggle('d-none', !sim);
+        field.required = sim;
+        if(!sim){ field.value = ''; }
+      }
+      document.querySelectorAll('input[name="associacao"]').forEach(r=>{
+        r.addEventListener('change', ()=>{ toggleAssocDesc(); updateReview(); refreshSubmitState(); });
+      });
+
+      // CNPJ live validation
+      $('#cnpj').addEventListener('input', e=>{
+        e.target.value=onlyDigits(e.target.value).slice(0,14);
+        const ok = !e.target.value || isValidCNPJ(e.target.value);
+        $('#cnpjHelp').textContent = ok? '' : 'CNPJ inválido';
+        refreshSubmitState(); updateReview();
+      });
+
+      // CEP auto-preenchimento (ViaCEP + BrasilAPI)
+      $('#cep').addEventListener('input', e=>{ e.target.value=onlyDigits(e.target.value).slice(0,8); updateReview(); });
+
+      async function lookupCep(cep){
+        const normalized = onlyDigits(cep);
+        if(normalized.length !== 8) return null;
+        const providers = [
+          async () => {
+            const res = await fetch(`https://viacep.com.br/ws/${normalized}/json/`);
+            if(!res.ok) throw new Error(`ViaCEP HTTP ${res.status}`);
+            const data = await res.json();
+            if(data?.erro) return null;
+            return {
+              logradouro: data.logradouro,
+              bairro: data.bairro,
+              cidade: data.localidade,
+              uf: data.uf
+            };
+          },
+          async () => {
+            const res = await fetch(`https://brasilapi.com.br/api/cep/v1/${normalized}`);
+            if(!res.ok) throw new Error(`BrasilAPI HTTP ${res.status}`);
+            const data = await res.json();
+            if(data?.errors || data?.error || data?.message) return null;
+            return {
+              logradouro: data.street || data.logradouro,
+              bairro: data.neighborhood || data.bairro,
+              cidade: data.city || data.localidade,
+              uf: data.state || data.uf
+            };
+          }
+        ];
+
+        for(const provider of providers){
+          try{
+            const result = await provider();
+            if(result) return result;
+          }catch(err){
+            console.warn('Falha no provedor de CEP:', err);
+          }
+        }
+        return null;
+      }
+
+      async function autofillAddressByCep(){
+        const cep = onlyDigits($('#cep').value);
+        if(cep.length !== 8) return;
+        const data = await lookupCep(cep);
+        if(!data) return;
+        $('#logradouro').value=String(data.logradouro||'').toUpperCase();
+        $('#bairro').value=String(data.bairro||'').toUpperCase();
+        $('#cidade').value=String(data.cidade||'').toUpperCase();
+        enforceRecife();
+        $('#uf').value=(data.uf||'').toUpperCase();
+        updateReview();
+        refreshSubmitState();
+      }
+
+      $('#cep').addEventListener('blur', autofillAddressByCep);
+      $('#cep').addEventListener('change', autofillAddressByCep);
+
+      // Divulgação toggles
+      $('#divulgacao').addEventListener('change', e=>{
+        const v=e.target.value;
+        const org = v==='Evento-Organização';
+        const outro = v==='OUTRO';
+        $('#orgWrap').classList.toggle('d-none', !org);
+        $('#organizador').required = org;
+        $('#comoWrap').classList.toggle('d-none', !outro);
+        $('#comoSoube').required = outro;
+        refreshSubmitState();
+      });
+
+      // Review ------------------------------------------------------------
+      function updateReview(){
+        const nome=esc($('#nome').value), email=esc(($('#email').value||'').toLowerCase());
+        const cpf=fmtCPF($('#cpf').value), tel=esc(onlyDigits($('#celular').value));
+        const cep=fmtCEP($('#cep').value), log=esc($('#logradouro').value), num=esc($('#numero').value), bai=esc($('#bairro').value), cid=esc($('#cidade').value), uf=esc(($('#uf').value||'').toUpperCase());
+        const produtoSelecionado = $('#produto').value==='OUTROS' ? $('#produtoOutro').value : $('#produto').value;
+        const prod = esc(produtoSelecionado);
+        const tipoSel = document.getElementById('tipoCadastro');
+        const tipoOption = tipoSel ? tipoSel.selectedOptions[0] : null;
+        const tipoCadastro = esc(tipoOption ? tipoOption.textContent : tipoSel?.value || '');
+        const segmentoSelect = document.getElementById('segmento');
+        const segmentoLabel = segmentoSelect && segmentoSelect.value ? esc(segmentoSelect.selectedOptions[0]?.textContent || '') : '';
+        const generoSelect = document.getElementById('genero');
+        const genero = generoSelect && generoSelect.value ? esc(generoSelect.selectedOptions[0]?.textContent || '') : '';
+        const racaSelect = document.getElementById('raca');
+        const raca = racaSelect && racaSelect.value ? esc(racaSelect.selectedOptions[0]?.textContent || '') : '';
+        const nascimentoIso = getDataNascimentoISO();
+        const nascimentoFmt = fmtDateBR(nascimentoIso);
+        const enderecoPartes = [];
+        if(cep) enderecoPartes.push(cep);
+        const logNumero = [log, num].filter(Boolean).join(', ');
+        if(logNumero) enderecoPartes.push(logNumero);
+        if(bai) enderecoPartes.push(bai);
+        const cidadeUf = [cid, uf].filter(Boolean).join('/');
+        if(cidadeUf) enderecoPartes.push(cidadeUf);
+        const enderecoResumo = enderecoPartes.join(' • ');
+        const tipoProdutoResumo = [tipoCadastro, segmentoLabel, prod].filter(Boolean).join(' • ');
+        $('#reviewBlock').innerHTML = `
+          <h6>Resumo</h6>
+          <table class="table table-sm review-table">
+            <tbody>
+              <tr><td width="220"><strong>Nome</strong></td><td>${nome}</td></tr>
+              <tr><td><strong>CPF</strong></td><td>${cpf}</td></tr>
+              <tr><td><strong>Nascimento</strong></td><td>${esc(nascimentoFmt)}</td></tr>
+              <tr><td><strong>E-mail</strong></td><td>${email}</td></tr>
+              <tr><td><strong>Celular</strong></td><td>${tel}</td></tr>
+              <tr><td><strong>Endereço</strong></td><td>${enderecoResumo}</td></tr>
+              <tr><td><strong>Tipo de cadastro • Produto</strong></td><td>${tipoProdutoResumo}</td></tr>
+              <tr><td><strong>Gênero</strong></td><td>${genero}</td></tr>
+              <tr><td><strong>Cor (IBGE)</strong></td><td>${raca}</td></tr>
+            </tbody>
+          </table>`;
+        updateRacialDeclaration();
+      }
+
+      const racialDeclarationBox = $('#racialDeclarationText');
+      const racialCheckbox = $('#racialDeclarationAgree');
+      const racialHint = $('#racialDeclarationHint');
+      const responsibilityBox = $('#responsibilityText');
+      const responsibilityCheckbox = $('#termoResponsabilidade');
+      const responsibilityHint = $('#responsibilityHint');
+      const declarationHintDefault = 'Leia o texto completo e marque o aceite quando estiver de acordo.';
+      let lastRacialSignature = '';
+      const declarationDateFormatter = new Intl.DateTimeFormat('pt-BR');
+
+      function resetDeclaration(box, checkbox, hint){
+        if(!box || !checkbox) return;
+        checkbox.checked = false;
+        checkbox.disabled = false;
+        if(hint){
+          hint.textContent = declarationHintDefault;
+        }
+        requestAnimationFrame(()=>{ box.scrollTop = 0; });
+        refreshSubmitState();
+      }
+
+      function markDeclarationReady(checkbox, hint){
+        if(!checkbox) return;
+        if(hint){
+          hint.textContent = 'Marque o checkbox para confirmar.';
+        }
+      }
+
+      function handleScrollable(box, checkbox, hint){
+        if(!box || !checkbox) return;
+        const reachedBottom = Math.ceil(box.scrollTop + box.clientHeight) >= box.scrollHeight - 4;
+        if(reachedBottom){
+          markDeclarationReady(checkbox, hint);
+        }
+      }
+
+      function updateRacialDeclaration(){
+        if(!racialDeclarationBox) return;
+        const nomeUpper = String($('#nome')?.value || '').trim().toUpperCase();
+        const cpfDigits = onlyDigits($('#cpf')?.value);
+        const cpfFormatted = cpfDigits ? fmtCPF(cpfDigits) : '';
+        const racaSelect = $('#raca');
+        const racaLabel = racaSelect && racaSelect.value ? String(racaSelect.selectedOptions[0]?.textContent || '').trim().toUpperCase() : '';
+        const generoSelect = $('#genero');
+        const generoUpper = generoSelect && generoSelect.value ? String(generoSelect.value).trim().toUpperCase() : '';
+        const autodeclaradoWord = generoUpper === 'FEMININO' ? 'AUTODECLARADA' : generoUpper === 'MASCULINO' ? 'AUTODECLARADO' : 'AUTODECLARANTE';
+        const cidadeUpper = String($('#cidade')?.value || '').trim().toUpperCase();
+        const raceKey = racaLabel ? racaLabel.normalize('NFD').replace(/[\u0300-\u036f]/g,'') : '';
+        const raceGenderMap = {
+          FEMININO: { BRANCA:'BRANCA', PRETA:'PRETA', PARDA:'PARDA', AMARELA:'AMARELA', INDIGENA:'INDÍGENA' },
+          MASCULINO: { BRANCA:'BRANCO', PRETA:'PRETO', PARDA:'PARDO', AMARELA:'AMARELO', INDIGENA:'INDÍGENA' }
+        };
+        let raceDisplay = racaLabel;
+        if(raceKey){
+          const map = raceGenderMap[generoUpper] || null;
+          if(map && map[raceKey]){
+            raceDisplay = map[raceKey];
+          }else if(raceGenderMap.FEMININO[raceKey]){
+            raceDisplay = raceGenderMap.FEMININO[raceKey];
+          }
+        }
+        const signature = [nomeUpper, cpfDigits, raceDisplay, cidadeUpper, autodeclaradoWord].join('|');
+        const nameSegment = nomeUpper ? `<strong>${esc(nomeUpper)}</strong>` : '____________________________';
+        const cpfSegment = cpfFormatted ? `<strong>${esc(cpfFormatted.toUpperCase())}</strong>` : '________________';
+        const raceSegment = raceDisplay ? `<strong>${esc(raceDisplay)}</strong>` : '________________';
+        const autodeclaradoSegment = autodeclaradoWord ? `<strong>${esc(autodeclaradoWord)}</strong>` : '________________';
+        const citySegment = cidadeUpper ? `<strong>${esc(cidadeUpper)}</strong>` : '________________';
+        const dateStr = declarationDateFormatter.format(new Date());
+        const raceSentence = `sou ${autodeclaradoSegment} ${raceSegment}.`;
+        const locationLine = [citySegment, `<strong>${esc(dateStr)}</strong>`].filter(Boolean).join(', ');
+        const template = [
+          'Para fins do disposto na Portaria do Ministério do Trabalho nº3784/2023, em cumprimento da Lei 14.553/02023.',
+          'As informações relativas à etnia e raça devem ser obrigatoriamente prestadas nas inclusões, alterações ou retificações cadastrais dos trabalhadores, respeitando o critério de autodeclaração do trabalhador, em conformidade com a classificação utilizada pelo Instituto Brasileiro de Geografia e Estatística– IBGE.',
+          '',
+          `Eu, ${nameSegment},`,
+          `portador do CPF nº ${cpfSegment}, AUTODECLARO, sob penas de lei que,`,
+          raceSentence,
+          '',
+          'Por ser expressão da verdade, firmo e assino a presente para que a mesma produza seus efeitos legais e de direito.',
+          locationLine
+        ].join('\n');
+        const hasChanged = signature !== lastRacialSignature;
+        if(hasChanged){
+          lastRacialSignature = signature;
+          resetDeclaration(racialDeclarationBox, racialCheckbox, racialHint);
+        }
+        racialDeclarationBox.innerHTML = template;
+      }
+
+      racialDeclarationBox?.addEventListener('scroll', ()=>handleScrollable(racialDeclarationBox, racialCheckbox, racialHint));
+      responsibilityBox?.addEventListener('scroll', ()=>handleScrollable(responsibilityBox, responsibilityCheckbox, responsibilityHint));
+      racialCheckbox?.addEventListener('change', refreshSubmitState);
+      responsibilityCheckbox?.addEventListener('change', refreshSubmitState);
+
+      const acceptAllBtn = $('#acceptAllDeclarations');
+      const declineAllBtn = $('#declineAllDeclarations');
+      acceptAllBtn?.addEventListener('click', ()=>{
+        if(racialDeclarationBox){
+          racialDeclarationBox.scrollTop = racialDeclarationBox.scrollHeight;
+          handleScrollable(racialDeclarationBox, racialCheckbox, racialHint);
+        }
+        if(responsibilityBox){
+          responsibilityBox.scrollTop = responsibilityBox.scrollHeight;
+          handleScrollable(responsibilityBox, responsibilityCheckbox, responsibilityHint);
+        }
+        if(racialCheckbox){
+          markDeclarationReady(racialCheckbox, racialHint);
+          racialCheckbox.checked = true;
+        }
+        if(responsibilityCheckbox){
+          markDeclarationReady(responsibilityCheckbox, responsibilityHint);
+          responsibilityCheckbox.checked = true;
+        }
+        refreshSubmitState();
+      });
+      declineAllBtn?.addEventListener('click', ()=>{
+        if(racialCheckbox){
+          racialCheckbox.checked = false;
+          if(racialHint){ racialHint.textContent = declarationHintDefault; }
+        }
+        if(responsibilityCheckbox){
+          responsibilityCheckbox.checked = false;
+          if(responsibilityHint){ responsibilityHint.textContent = declarationHintDefault; }
+        }
+        refreshSubmitState();
+      });
+
+      // Submit state ------------------------------------------------------
+      function refreshSubmitState(){
+        const missingFields = [];
+        const invalidFields = [];
+        const requiredSelectors = [
+          '#tipoCadastro','#segmento','#produto','#cpf','#nome','#genero','#raca','#mae','#dataNascimento',
+          '#email','#celular','#cep','#logradouro','#numero','#bairro','#cidade','#uf',
+          '#sobreTrabalho','#tempoAtv','#renda','#divulgacao','#docFrente','#docVerso','#compDomicilio','#foto1','#foto2'
+        ];
+        let requiredFilled = true;
+        requiredSelectors.forEach(sel => {
+          const el = $(sel);
+          if(!el) return;
+          const hiddenAncestor = el.closest('.d-none');
+          if(el.disabled || hiddenAncestor){
+            setFieldInvalid(el, false);
+            return;
+          }
+          let ok = true;
+          if(el.type === 'file'){
+            ok = (el.files || []).length > 0;
+          }else if(el.type === 'checkbox' || el.type === 'radio'){
+            ok = !!el.checked;
+          }else{
+            ok = !!String(el.value || '').trim();
+          }
+          if(!ok){
+            requiredFilled = false;
+            const label = FIELD_LABELS[sel] || 'Campo obrigatório';
+            const message = el.type === 'file' ? `${label}: selecione um arquivo.` : `${label}: preencha este campo.`;
+            missingFields.push({ selector: sel, message, element: el });
+          }
+          setFieldInvalid(el, !ok);
+        });
+
+        const cpfEl = $('#cpf');
+        const cpfOk = isValidCPF(cpfEl.value);
+        setFieldInvalid(cpfEl, !cpfOk);
+        if(!cpfOk){
+          invalidFields.push({ selector: '#cpf', message: 'CPF inválido: informe um número válido.', element: cpfEl });
+        }
+
+        const cellEl = $('#celular');
+        const celOk = isValidCell(cellEl.value);
+        setFieldInvalid(cellEl, !celOk);
+        if(!celOk){
+          invalidFields.push({ selector: '#celular', message: 'Telefone celular inválido: utilize DDD + número com 11 dígitos.', element: cellEl });
+        }
+
+        const emailEl = $('#email');
+        const emailOk = isValidEmail(emailEl.value);
+        setFieldInvalid(emailEl, !emailOk);
+        if(!emailOk){
+          invalidFields.push({ selector: '#email', message: 'E-mail inválido: verifique o formato informado.', element: emailEl });
+        }
+
+        const nascimentoEl = $('#dataNascimento');
+        let nascimentoOk = false;
+        if(nascimentoEl){
+          const birthCheck = evaluateBirthdate({ showFeedback: false });
+          nascimentoOk = birthCheck.valid;
+          if(birthCheck.valid){
+            nascimentoEl.setCustomValidity('');
+            setFieldInvalid(nascimentoEl, false);
+          }else if(birthCheck.reason !== 'empty'){
+            const message = birthCheck.message || BIRTHDATE_INVALID_MESSAGE;
+            nascimentoEl.setCustomValidity(message);
+            setFieldInvalid(nascimentoEl, true);
+            invalidFields.push({ selector: '#dataNascimento', message: `Data de nascimento: ${message}`, element: nascimentoEl });
+          }else{
+            nascimentoEl.setCustomValidity('');
+          }
+        }
+
+        const cnpjIsReq = document.getElementById('meiSim').checked;
+        const cnpjEl = $('#cnpj');
+        const cnpjOk = !cnpjIsReq || isValidCNPJ(cnpjEl.value);
+        if(cnpjIsReq){
+          setFieldInvalid(cnpjEl, !cnpjOk);
+          if(!cnpjOk){
+            invalidFields.push({ selector: '#cnpj', message: 'CNPJ inválido: informe um número válido.', element: cnpjEl });
+          }
+        }else{
+          setFieldInvalid(cnpjEl, false);
+        }
+
+        const certInput = $('#certMeiCnpj');
+        const certReqOk = !cnpjIsReq || (certInput.files||[]).length>0;
+        if(cnpjIsReq){
+          setFieldInvalid(certInput, !certReqOk);
+          if(!certReqOk){
+            missingFields.push({ selector: '#certMeiCnpj', message: `${FIELD_LABELS['#certMeiCnpj']}: selecione um arquivo.`, element: certInput });
+          }
+        }else{
+          setFieldInvalid(certInput, false);
+        }
+
+        const produtoOutroEl = $('#produtoOutro');
+        const produtoOutroOk = ($('#produto').value!=='OUTROS') || (!!produtoOutroEl.value.trim());
+        const produtoOutroVisivel = !$('#produtoOutroWrap').classList.contains('d-none');
+        setFieldInvalid(produtoOutroEl, !produtoOutroOk && produtoOutroVisivel);
+        if(!produtoOutroOk && produtoOutroVisivel){
+          missingFields.push({ selector: '#produtoOutro', message: `${FIELD_LABELS['#produtoOutro']}: descreva o produto.`, element: produtoOutroEl });
+        }
+
+        const divulgacaoEl = $('#divulgacao');
+        const divulgOrgOk = (divulgacaoEl.value!=='Evento-Organização') || (!!$('#organizador').value.trim());
+        const organizadorEl = $('#organizador');
+        setFieldInvalid(organizadorEl, !divulgOrgOk && divulgacaoEl.value==='Evento-Organização');
+        if(!divulgOrgOk && divulgacaoEl.value==='Evento-Organização'){
+          missingFields.push({ selector: '#organizador', message: `${FIELD_LABELS['#organizador']}: informe o evento ou organização.`, element: organizadorEl });
+        }
+
+        const divulgOutroOk = (divulgacaoEl.value!=='OUTRO') || (!!($('#comoSoube').value||'').trim());
+        const comoSoubeEl = $('#comoSoube');
+        setFieldInvalid(comoSoubeEl, !divulgOutroOk && divulgacaoEl.value==='OUTRO');
+        if(!divulgOutroOk && divulgacaoEl.value==='OUTRO'){
+          missingFields.push({ selector: '#comoSoube', message: `${FIELD_LABELS['#comoSoube']}: descreva o canal informado.`, element: comoSoubeEl });
+        }
+
+        const assocSim = document.getElementById('assocSim').checked;
+        const assocDescEl = $('#assocDesc');
+        const assocDescOk = !assocSim || (!!(assocDescEl.value||'').trim());
+        setFieldInvalid(assocDescEl, !assocDescOk && assocSim);
+        if(!assocDescOk && assocSim){
+          missingFields.push({ selector: '#assocDesc', message: `${FIELD_LABELS['#assocDesc']}: detalhe a associação.`, element: assocDescEl });
+        }
+
+        const cidadeEl = $('#cidade');
+        const cityValue = cidadeEl.value;
+        const cityOk = isRecifeCity(cityValue);
+        if(cityValue){
+          setFieldInvalid(cidadeEl, !cityOk);
+          if(!cityOk){
+            invalidFields.push({ selector: '#cidade', message: 'Cidade inválida: o cadastro é exclusivo para Recife.', element: cidadeEl });
+          }
+        }
+
+        const termoEl = $('#termoResponsabilidade');
+        const racialCheckbox = $('#racialDeclarationAgree');
+        const termoOk = termoEl ? termoEl.checked : false;
+        const racialOk = racialCheckbox ? racialCheckbox.checked : false;
+        if(termoEl){
+          setFieldInvalid(termoEl, !termoOk);
+          if(!termoOk){
+            missingFields.push({ selector: '#termoResponsabilidade', message: `${FIELD_LABELS['#termoResponsabilidade']}: marque para confirmar.`, element: termoEl });
+          }
+        }
+        if(racialCheckbox){
+          setFieldInvalid(racialCheckbox, !racialOk);
+          if(!racialOk){
+            missingFields.push({ selector: '#racialDeclarationAgree', message: `${FIELD_LABELS['#racialDeclarationAgree']}: marque o aceite após a leitura.`, element: racialCheckbox });
+          }
+        }
+
+        const allOk = requiredFilled && cpfOk && celOk && emailOk && nascimentoOk && cnpjOk && certReqOk && produtoOutroOk && divulgOrgOk && divulgOutroOk && assocDescOk && cityOk && termoOk && racialOk;
+        const issues = [...missingFields, ...invalidFields];
+        const focusElement = issues.find(item => item.element)?.element || null;
+        validationState = { allOk, issues, focusElement };
+
+        const btn = $('#btnSubmitAll');
+        if(btn){
+          btn.dataset.ready = allOk ? 'true' : 'false';
+          btn.setAttribute('aria-disabled', allOk ? 'false' : 'true');
+          btn.classList.toggle('btn-success', allOk);
+          btn.classList.toggle('btn-secondary', !allOk);
+        }
+        return validationState;
+      }
+
+      // Files/inputs listeners for submit state + review
+      const allWatch = ['change','input','blur'];
+      const selectors = [
+        '#tipoCadastro','#segmento','#produto','#produtoOutro','#genero','#raca','#cpf','#nome','#nomeSocial','#rg',
+        '#mae','#pai','#dataNascimento','#email','#celular','#cep','#logradouro','#numero','#bairro','#cidade','#uf',
+        '#carteiraSim','#carteiraNao','#numCarteira','#instagram','#marca','#meiSim','#meiNao','#cnpj','#fantasia',
+        '#formSim','#formNao','#abrirMeiSim','#abrirMeiNao','#divulgacao','#organizador','#comoSoube',
+        '#assocSim','#assocNao','#assocDesc',
+        '#docFrente','#docVerso','#compDomicilio','#certMeiCnpj','#foto1','#foto2','#foto3','#foto4','#sobreTrabalho','#tempoAtv','#renda','#termoResponsabilidade'
+      ];
+      selectors.forEach(sel=>{ const el=$(sel); if(!el) return; allWatch.forEach(evt=> el.addEventListener(evt, ()=>{ updateReview(); refreshSubmitState(); })); });
+
+      function disableAutocomplete(){
+        document.querySelectorAll('input, select, textarea').forEach(el=>{
+          el.setAttribute('autocomplete','off');
+        });
+      }
+
+      // Envio -------------------------------------------------------------
+      function arrayBufferToBase64(buffer){
+        const bytes = new Uint8Array(buffer);
+        const chunkSize = 0x8000;
+        let binary = '';
+        for(let i = 0; i < bytes.length; i += chunkSize){
+          const chunk = bytes.subarray(i, i + chunkSize);
+          binary += String.fromCharCode.apply(null, chunk);
+        }
+        return btoa(binary);
+      }
+
+      async function fileToBase64(file){
+        return new Promise((resolve, reject)=>{
+          const reader = new FileReader();
+          reader.onload = () => {
+            try{
+              if(!(reader.result instanceof ArrayBuffer)){
+                resolve('');
+                return;
+              }
+              const encoded = arrayBufferToBase64(reader.result);
+              resolve(encoded);
+            }catch(err){
+              reject(err);
+            }
+          };
+          reader.onerror = () => reject(reader.error || new Error('Falha ao ler arquivo'));
+          reader.readAsArrayBuffer(file);
+        });
+      }
+
+      async function buildAttachments(){
+        const configs = [
+          { id: 'docFrente', field: 'doc_frente' },
+          { id: 'docVerso', field: 'doc_verso' },
+          { id: 'compDomicilio', field: 'comp_domicilio' },
+          { id: 'certMeiCnpj', field: 'cert_mei_cnpj' },
+          { id: 'foto1', field: 'foto1' },
+          { id: 'foto2', field: 'foto2' },
+          { id: 'foto3', field: 'foto3' },
+          { id: 'foto4', field: 'foto4' }
+        ];
+        const anexos = [];
+        for (const cfg of configs){
+          const input = document.getElementById(cfg.id);
+          if(!input || !(input.files||[]).length) continue;
+          const file = input.files[0];
+          const base64 = await fileToBase64(file);
+          const name = file.name || '';
+          const extension = name.includes('.') ? name.split('.').pop() : '';
+          anexos.push({
+            campo: cfg.field,
+            fileName: name,
+            fileExtension: extension ? extension.toLowerCase() : '',
+            mimeType: file.type || '',
+            base64
+          });
+        }
+        return anexos;
+      }
+
+      function getNascimentoDisplay(){
+        const isoStored = getDataNascimentoISO();
+        return fmtDateBR(isoStored);
+      }
+
+      function pruneOptionalFields(payload){
+        const optionalKeys = [
+          'segmento','segmento_label','produto_outro','nome_social','rg','num_carteira',
+          'instagram','cnpj','fantasia','assoc_descricao','organizador','como_soube'
+        ];
+        optionalKeys.forEach(key => {
+          if(!(key in payload)) return;
+          const val = payload[key];
+          if(typeof val === 'string' && !val.trim()){
+            delete payload[key];
+          }
+        });
+        return payload;
+      }
+
+      async function submitAll(existingState){
+        const state = existingState || refreshSubmitState();
+        if(!state.allOk){
+          return;
+        }
+        try{
+          $('#finalStatus').innerHTML = `<span class="badge text-bg-secondary">Enviando...</span>`;
+          const tipoSelect = document.getElementById('tipoCadastro');
+          const tipoOption = tipoSelect ? tipoSelect.selectedOptions[0] : null;
+          const segmentoSelect = document.getElementById('segmento');
+          const segmentoOption = segmentoSelect ? segmentoSelect.selectedOptions[0] : null;
+          const generoSelect = document.getElementById('genero');
+          const generoOption = generoSelect ? generoSelect.selectedOptions[0] : null;
+          const racaSelect = document.getElementById('raca');
+          const racaOption = racaSelect ? racaSelect.selectedOptions[0] : null;
+          const produtoSelect = document.getElementById('produto');
+          const produtoOption = produtoSelect ? produtoSelect.selectedOptions[0] : null;
+          const produtoFinal = $('#produto').value==='OUTROS' ? $('#produtoOutro').value : $('#produto').value;
+          const nascimentoIso = getDataNascimentoISO();
+          const nascimentoDisplay = getNascimentoDisplay();
+          const anexos = await buildAttachments();
+
+          const payload = {
+            tipo_inscricao: document.querySelector('input[name=tipoInscricao]:checked').value,
+            tipo_cadastro: $('#tipoCadastro').value,
+            tipo_cadastro_label: tipoOption ? tipoOption.textContent.trim() : '',
+            tipo_cadastro_produtos_id: tipoOption ? (tipoOption.dataset?.productsId || '') : '',
+            segmento: segmentoSelect && !segmentoSelect.disabled ? segmentoSelect.value : '',
+            segmento_label: segmentoOption ? segmentoOption.textContent.trim() : '',
+            produto: produtoFinal,
+            produto_label: produtoOption ? produtoOption.textContent.trim() : '',
+            produto_outro: $('#produtoOutro').value.trim(),
+            cpf: onlyDigits($('#cpf').value),
+            nome: $('#nome').value.trim(),
+            nome_social: $('#nomeSocial').value.trim(),
+            rg: $('#rg').value.trim(),
+            genero: generoSelect ? generoSelect.value : '',
+            genero_label: generoOption ? generoOption.textContent.trim() : '',
+            autodeclaracao_cor: racaSelect ? racaSelect.value : '',
+            autodeclaracao_cor_label: racaOption ? racaOption.textContent.trim() : '',
+            mae: $('#mae').value.trim(),
+            pai: $('#pai').value.trim(),
+            nascimento: nascimentoDisplay,
+            nascimento_iso: nascimentoIso,
+            email: $('#email').value.toLowerCase(),
+            celular: onlyDigits($('#celular').value),
+            cep: onlyDigits($('#cep').value),
+            logradouro: $('#logradouro').value.trim(),
+            numero: $('#numero').value.trim(),
+            complemento: $('#complemento').value.trim(),
+            bairro: $('#bairro').value.trim(),
+            cidade: $('#cidade').value.trim(),
+            uf: $('#uf').value.trim().toUpperCase(),
+            carteira_artesao: document.querySelector('input[name=carteiraArt]:checked')?.value||'NAO',
+            num_carteira: $('#numCarteira').value.trim(),
+            marca: $('#marca').value.trim(),
+            instagram: $('#instagram').value.toLowerCase(),
+            tem_mei: document.querySelector('input[name=temMei]:checked')?.value||'NAO',
+            cnpj: onlyDigits($('#cnpj').value),
+            fantasia: $('#fantasia').value.trim(),
+            deseja_formalizar: document.querySelector('input[name=formalizar]:checked')?.value||'NAO',
+            deseja_abrir_mei_agora: document.querySelector('input[name=abrirMei]:checked')?.value||'NAO',
+            pertence_associacao: document.querySelector('input[name=associacao]:checked')?.value||'NAO',
+            assoc_descricao: $('#assocDesc').value.trim(),
+            sobre_trabalho: $('#sobreTrabalho').value.trim(),
+            tempo_atividade: $('#tempoAtv').value,
+            renda_media: $('#renda').value,
+            divulgacao: $('#divulgacao').value,
+            organizador: $('#organizador').value,
+            como_soube: $('#comoSoube').value,
+            termo_responsabilidade: document.getElementById('termoResponsabilidade')?.checked ? 'ACEITO' : 'NAO',
+            autodeclaracao_racial: racialCheckbox && racialCheckbox.checked ? 'ACEITO' : 'NAO',
+            autodeclaracao_racial_texto: (racialDeclarationBox?.innerText || '').trim(),
+            anexos,
+            enviado_em: new Date().toISOString()
+          };
+
+          if(payload.produto !== 'OUTROS'){
+            delete payload.produto_outro;
+          }
+          if(!payload.segmento){
+            delete payload.segmento;
+            delete payload.segmento_label;
+          }
+
+          pruneOptionalFields(payload);
+
+          const res = await fetch(FINAL_ENDPOINT, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json; charset=utf-8',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify(payload)
+          });
+          const responseText = await res.text();
+          let responseData = null;
+          try{ responseData = responseText ? JSON.parse(responseText) : null; }
+          catch(e){ responseData = null; }
+          if(res.ok){
+            await showMessage('Dados enviados com sucesso!');
+            document.getElementById('app').innerHTML = `<div class="py-5 text-center"><h3 class="mb-3">Inscrição recebida</h3><p class="text-muted">Você receberá atualizações pelos canais informados.</p></div>`;
+          }else{
+            const detail = responseData && (responseData.message || responseData.messsage || responseData.error || responseText);
+            $('#finalStatus').innerHTML = `<span class="badge text-bg-danger">Falha no envio</span>`;
+            $('#finalOut').textContent = detail || responseText || '';
+            $('#finalOut').classList.remove('d-none');
+            await showMessage('Não foi possível enviar os dados neste momento. Tente novamente em instantes.');
+          }
+        }catch(e){
+          $('#finalStatus').innerHTML = `<span class="badge text-bg-danger">Erro de rede</span>`; $('#finalOut').textContent=String(e); $('#finalOut').classList.remove('d-none');
+          await showMessage('Ocorreu um problema de conexão. Verifique a internet e tente novamente.');
+        }
+      }
+      document.getElementById('btnSubmitAll').addEventListener('click', async (event)=>{
+        const btn = event.currentTarget;
+        const state = refreshSubmitState();
+        const disabledState = btn.getAttribute('aria-disabled') === 'true';
+        if(disabledState || !state.allOk){
+          event.preventDefault();
+          $('#finalStatus').innerHTML = `<span class="badge text-bg-warning">Revise os campos destacados</span>`;
+          await showAlertMissingFields(state.issues, state.focusElement);
+          return;
+        }
+        await submitAll(state);
+      });
+
+      // Init --------------------------------------------------------------
+      function init(){
+        disableAutocomplete();
+        toggleAssocDesc();
+        enforceRecife();
+        updateSegmentoVisibility();
+        resetDeclaration(racialDeclarationBox, racialCheckbox, racialHint);
+        resetDeclaration(responsibilityBox, responsibilityCheckbox, responsibilityHint);
+        const emailValue = ($('#email')?.value || '').trim();
+        updateEmailHelp(emailValue, isValidEmail(emailValue));
+        const numeroEl = $('#numero');
+        if(numeroEl){
+          const sanitizedNumero = sanitizeNumeroValue(numeroEl.value);
+          numeroEl.value = sanitizedNumero;
+          numeroEl.setCustomValidity(numeroIsValid(sanitizedNumero) ? '' : 'Informe o número ou S/N.');
+        }
+        const nascEl = $('#dataNascimento');
+        if(nascEl){
+          updateBirthdateFeedback(BIRTHDATE_INVALID_MESSAGE);
+          evaluateBirthdate({ showFeedback: false });
+        }
+        updateReview();
+        refreshSubmitState();
+        loadProducts();
+      }
+      init();
+    </script>
+  </body>
+</html>
