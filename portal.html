@@ -34,6 +34,8 @@
       .help{ font-size:.9rem; color:#6c757d; }
       .section-title{ font-weight:700; letter-spacing:.2px; color:#0b2447; }
       .dropzone{ border:2px dashed #cfe2ff; border-radius:.75rem; padding:1rem; background:#f8fbff; }
+      .camera-actions{ margin-top:.75rem; }
+      .camera-actions .btn{ font-size:.85rem; }
       .form-control:focus,.form-select:focus{ box-shadow:0 0 0 .25rem rgba(13,110,253,.15); border-color:var(--brand); }
       pre.json{ background:#0b1020; color:#e6edf3; border-radius:.75rem; padding:1rem; max-height:40vh; overflow:auto; }
       .badge-soft{ background:#e7f1ff; color:#0b2447; border:1px solid #cfe2ff; }
@@ -417,25 +419,25 @@
             <div class="col-12">
               <label class="form-label required">Documento Oficial (Frente)</label>
               <div class="dropzone">
-                <input class="form-control" type="file" id="docFrente" accept="image/*,application/pdf" capture="environment">
+                <input class="form-control" type="file" id="docFrente" accept="image/*,application/pdf">
               </div>
             </div>
             <div class="col-12">
               <label class="form-label required">Documento Oficial (Verso)</label>
               <div class="dropzone">
-                <input class="form-control" type="file" id="docVerso" accept="image/*,application/pdf" capture="environment">
+                <input class="form-control" type="file" id="docVerso" accept="image/*,application/pdf">
               </div>
             </div>
             <div class="col-12">
               <label class="form-label required">Comprovante de residência</label>
               <div class="dropzone">
-                <input class="form-control" type="file" id="compDomicilio" accept="image/*,application/pdf" capture="environment">
+                <input class="form-control" type="file" id="compDomicilio" accept="image/*,application/pdf">
               </div>
             </div>
             <div class="col-12">
               <label class="form-label" id="certLabel">Certificado do MEI OU CNPJ</label>
               <div class="dropzone">
-                <input class="form-control" type="file" id="certMeiCnpj" accept="image/*,application/pdf" capture="environment">
+                <input class="form-control" type="file" id="certMeiCnpj" accept="image/*,application/pdf">
               </div>
               <div class="help" id="certHelp">Obrigatório quando possuir MEI ou CNPJ informado.</div>
             </div>
@@ -445,19 +447,19 @@
           <div class="row g-3">
             <div class="col-12">
               <label class="form-label required">Foto 1</label>
-              <div class="dropzone"><input class="form-control" type="file" id="foto1" accept="image/*" capture="environment"></div>
+              <div class="dropzone"><input class="form-control" type="file" id="foto1" accept="image/*"></div>
             </div>
             <div class="col-12">
               <label class="form-label required">Foto 2</label>
-              <div class="dropzone"><input class="form-control" type="file" id="foto2" accept="image/*" capture="environment"></div>
+              <div class="dropzone"><input class="form-control" type="file" id="foto2" accept="image/*"></div>
             </div>
             <div class="col-12">
               <label class="form-label">Foto 3</label>
-              <div class="dropzone"><input class="form-control" type="file" id="foto3" accept="image/*" capture="environment"></div>
+              <div class="dropzone"><input class="form-control" type="file" id="foto3" accept="image/*"></div>
             </div>
             <div class="col-12">
               <label class="form-label">Foto 4</label>
-              <div class="dropzone"><input class="form-control" type="file" id="foto4" accept="image/*" capture="environment"></div>
+              <div class="dropzone"><input class="form-control" type="file" id="foto4" accept="image/*"></div>
             </div>
           </div>
         </div>
@@ -1835,6 +1837,78 @@
         });
       }
 
+      const CAMERA_TARGET_IDS = ['docFrente','docVerso','compDomicilio','certMeiCnpj','foto1','foto2','foto3','foto4'];
+
+      function preferredCaptureAcceptValue(input){
+        const accept = input?.getAttribute('accept') || '';
+        if(!accept) return 'image/*';
+        const parts = accept.split(',').map(part => part.trim().toLowerCase());
+        if(parts.includes('image/*')) return 'image/*';
+        const first = parts.find(Boolean);
+        return first || 'image/*';
+      }
+
+      function openRearCameraForInput(targetInput){
+        if(!targetInput){
+          return;
+        }
+        const captureInput = document.createElement('input');
+        captureInput.type = 'file';
+        captureInput.accept = preferredCaptureAcceptValue(targetInput);
+        captureInput.setAttribute('capture','environment');
+        captureInput.style.display = 'none';
+        const cleanup = () => {
+          captureInput.remove();
+        };
+        captureInput.addEventListener('change', ()=>{
+          try{
+            const files = captureInput.files;
+            if(!(files && files.length)){
+              cleanup();
+              return;
+            }
+            if(typeof DataTransfer !== 'undefined'){
+              const transfer = new DataTransfer();
+              Array.from(files).forEach(file => transfer.items.add(file));
+              targetInput.files = transfer.files;
+            }else if(files.length){
+              targetInput.files = files;
+            }
+            targetInput.dispatchEvent(new Event('input', { bubbles: true }));
+            targetInput.dispatchEvent(new Event('change', { bubbles: true }));
+          }catch(err){
+            console.warn('Não foi possível copiar o arquivo da câmera.', err);
+          }finally{
+            cleanup();
+          }
+        }, { once: true });
+        document.body.appendChild(captureInput);
+        captureInput.click();
+      }
+
+      function setupCameraButtons(){
+        CAMERA_TARGET_IDS.forEach(id => {
+          const input = document.getElementById(id);
+          if(!input || input.dataset.cameraReady === 'true'){
+            return;
+          }
+          const dropzone = input.closest('.dropzone');
+          if(!dropzone){
+            return;
+          }
+          const actions = document.createElement('div');
+          actions.className = 'camera-actions';
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'btn btn-outline-primary btn-sm';
+          button.textContent = 'Usar câmera traseira';
+          button.addEventListener('click', ()=> openRearCameraForInput(input));
+          actions.appendChild(button);
+          dropzone.insertAdjacentElement('afterend', actions);
+          input.dataset.cameraReady = 'true';
+        });
+      }
+
       // Envio -------------------------------------------------------------
       function collectAttachments(){
         const configs = [
@@ -2022,6 +2096,7 @@
       // Init --------------------------------------------------------------
       function init(){
         disableAutocomplete();
+        setupCameraButtons();
         toggleAssocDesc();
         enforceRecife();
         updateSegmentoVisibility();
