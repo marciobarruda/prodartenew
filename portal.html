@@ -34,6 +34,8 @@
       .help{ font-size:.9rem; color:#6c757d; }
       .section-title{ font-weight:700; letter-spacing:.2px; color:#0b2447; }
       .dropzone{ border:2px dashed #cfe2ff; border-radius:.75rem; padding:1rem; background:#f8fbff; }
+      .camera-actions{ margin-top:.75rem; }
+      .camera-actions .btn{ font-size:.85rem; }
       .form-control:focus,.form-select:focus{ box-shadow:0 0 0 .25rem rgba(13,110,253,.15); border-color:var(--brand); }
       pre.json{ background:#0b1020; color:#e6edf3; border-radius:.75rem; padding:1rem; max-height:40vh; overflow:auto; }
       .badge-soft{ background:#e7f1ff; color:#0b2447; border:1px solid #cfe2ff; }
@@ -277,7 +279,6 @@
       <div class="card card-form mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
           <h2 class="h5 mb-0">Endereço</h2>
-          <span class="badge badge-soft">ViaCEP / BrasilAPI automáticos</span>
         </div>
         <div class="card-body">
           <div class="row g-3">
@@ -1836,39 +1837,80 @@
         });
       }
 
-      // Envio -------------------------------------------------------------
-      function arrayBufferToBase64(buffer){
-        const bytes = new Uint8Array(buffer);
-        const chunkSize = 0x8000;
-        let binary = '';
-        for(let i = 0; i < bytes.length; i += chunkSize){
-          const chunk = bytes.subarray(i, i + chunkSize);
-          binary += String.fromCharCode.apply(null, chunk);
-        }
-        return btoa(binary);
+      const CAMERA_TARGET_IDS = ['docFrente','docVerso','compDomicilio','certMeiCnpj','foto1','foto2','foto3','foto4'];
+
+      function preferredCaptureAcceptValue(input){
+        const accept = input?.getAttribute('accept') || '';
+        if(!accept) return 'image/*';
+        const parts = accept.split(',').map(part => part.trim().toLowerCase());
+        if(parts.includes('image/*')) return 'image/*';
+        const first = parts.find(Boolean);
+        return first || 'image/*';
       }
 
-      async function fileToBase64(file){
-        return new Promise((resolve, reject)=>{
-          const reader = new FileReader();
-          reader.onload = () => {
-            try{
-              if(!(reader.result instanceof ArrayBuffer)){
-                resolve('');
-                return;
-              }
-              const encoded = arrayBufferToBase64(reader.result);
-              resolve(encoded);
-            }catch(err){
-              reject(err);
+      function openRearCameraForInput(targetInput){
+        if(!targetInput){
+          return;
+        }
+        const captureInput = document.createElement('input');
+        captureInput.type = 'file';
+        captureInput.accept = preferredCaptureAcceptValue(targetInput);
+        captureInput.setAttribute('capture','environment');
+        captureInput.style.display = 'none';
+        const cleanup = () => {
+          captureInput.remove();
+        };
+        captureInput.addEventListener('change', ()=>{
+          try{
+            const files = captureInput.files;
+            if(!(files && files.length)){
+              cleanup();
+              return;
             }
-          };
-          reader.onerror = () => reject(reader.error || new Error('Falha ao ler arquivo'));
-          reader.readAsArrayBuffer(file);
+            if(typeof DataTransfer !== 'undefined'){
+              const transfer = new DataTransfer();
+              Array.from(files).forEach(file => transfer.items.add(file));
+              targetInput.files = transfer.files;
+            }else if(files.length){
+              targetInput.files = files;
+            }
+            targetInput.dispatchEvent(new Event('input', { bubbles: true }));
+            targetInput.dispatchEvent(new Event('change', { bubbles: true }));
+          }catch(err){
+            console.warn('Não foi possível copiar o arquivo da câmera.', err);
+          }finally{
+            cleanup();
+          }
+        }, { once: true });
+        document.body.appendChild(captureInput);
+        captureInput.click();
+      }
+
+      function setupCameraButtons(){
+        CAMERA_TARGET_IDS.forEach(id => {
+          const input = document.getElementById(id);
+          if(!input || input.dataset.cameraReady === 'true'){
+            return;
+          }
+          const dropzone = input.closest('.dropzone');
+          if(!dropzone){
+            return;
+          }
+          const actions = document.createElement('div');
+          actions.className = 'camera-actions';
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'btn btn-outline-primary btn-sm';
+          button.textContent = 'Usar câmera traseira';
+          button.addEventListener('click', ()=> openRearCameraForInput(input));
+          actions.appendChild(button);
+          dropzone.insertAdjacentElement('afterend', actions);
+          input.dataset.cameraReady = 'true';
         });
       }
 
-      async function buildAttachments(){
+      // Envio -------------------------------------------------------------
+      function collectAttachments(){
         const configs = [
           { id: 'docFrente', field: 'doc_frente' },
           { id: 'docVerso', field: 'doc_verso' },
@@ -1884,7 +1926,6 @@
           const input = document.getElementById(cfg.id);
           if(!input || !(input.files||[]).length) continue;
           const file = input.files[0];
-          const base64 = await fileToBase64(file);
           const name = file.name || '';
           const extension = name.includes('.') ? name.split('.').pop() : '';
           anexos.push({
@@ -1892,7 +1933,7 @@
             fileName: name,
             fileExtension: extension ? extension.toLowerCase() : '',
             mimeType: file.type || '',
-            base64
+            file
           });
         }
         return anexos;
@@ -1938,7 +1979,8 @@
           const produtoFinal = $('#produto').value==='OUTROS' ? $('#produtoOutro').value : $('#produto').value;
           const nascimentoIso = getDataNascimentoISO();
           const nascimentoDisplay = getNascimentoDisplay();
-          const anexos = await buildAttachments();
+          const anexos = collectAttachments();
+          const anexosMeta = anexos.map(({ file, ...meta }) => meta);
 
           const payload = {
             tipo_inscricao: document.querySelector('input[name=tipoInscricao]:checked').value,
@@ -1991,7 +2033,7 @@
             termo_responsabilidade: document.getElementById('termoResponsabilidade')?.checked ? 'ACEITO' : 'NAO',
             autodeclaracao_racial: racialCheckbox && racialCheckbox.checked ? 'ACEITO' : 'NAO',
             autodeclaracao_racial_texto: (racialDeclarationBox?.innerText || '').trim(),
-            anexos,
+            anexos: anexosMeta,
             enviado_em: new Date().toISOString()
           };
 
@@ -2005,13 +2047,19 @@
 
           pruneOptionalFields(payload);
 
+          const formData = new FormData();
+          formData.append('payload', JSON.stringify(payload));
+          anexos.forEach(anexo => {
+            const safeName = anexo.fileName || `${anexo.campo}.${anexo.fileExtension || 'bin'}`;
+            formData.append(anexo.campo, anexo.file, safeName);
+          });
+
           const res = await fetch(FINAL_ENDPOINT, {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json; charset=utf-8',
               'Accept': 'application/json'
             },
-            body: JSON.stringify(payload)
+            body: formData
           });
           const responseText = await res.text();
           let responseData = null;
@@ -2048,6 +2096,7 @@
       // Init --------------------------------------------------------------
       function init(){
         disableAutocomplete();
+        setupCameraButtons();
         toggleAssocDesc();
         enforceRecife();
         updateSegmentoVisibility();
